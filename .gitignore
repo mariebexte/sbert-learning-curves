@@ -1,7 +1,10 @@
 venv
 RESULTS_PRELIM_EXP
-results
-data
+_results*
+results*
+data*
 _old_stuff
 __pycache__
-analysis
+_analysis
+REDO_BERT
+REDO_SBERT_MODELS

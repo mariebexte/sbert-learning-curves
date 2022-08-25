@@ -12,6 +12,15 @@ data_folder = "data"
 # Desired order of columns in final files
 data_columns = ["prompt", "id", "text", "label"]
 
+state=4334
+
+
+def has_at_least_two_labels(df):
+
+    if len(df["label"].unique()) < 2:
+        return False
+    return True
+
 
 def split_asap():
 
@@ -63,7 +72,15 @@ def split_asap():
 
         # Take val_size instances of train as val
         df_prompt = df_train[df_train["prompt"] == prompt]
-        df_val = df_prompt.sample(val_size, random_state=4334)
+        df_val = df_prompt.sample(val_size, random_state=state)
+
+        num_try = 1
+        while not has_at_least_two_labels(df_val):
+            print("NOT DIVERSE", prompt, df_val)
+            df_val = df_prompt.sample(val_size, random_state=state+num_try)
+            num_try += 1
+        if num_try > 1:
+            print(df_val)
         df_rest = df_prompt.drop(df_val.index)
 
         # Save val and remaining train as new training data
@@ -147,7 +164,14 @@ def write_SRA_train_val(two_way_path, five_way_path, subset, train_path, val_siz
         df_prompt = df_dict_train[prompt]
 
         # Sample val_size instances of the data for validation, rest becomes train
-        df_val = df_prompt.sample(val_size, random_state=4334)
+        df_val = df_prompt.sample(val_size, random_state=state)
+        num_try = 1
+        while not has_at_least_two_labels(df_val):
+            print("NOT DIVERSE", prompt, df_val)
+            df_val = df_prompt.sample(val_size, random_state=state+num_try)
+            num_try += 1
+        if num_try > 1:
+            print(df_val)
         df_train = df_prompt.drop(df_val.index)
 
         # Save prompt validation and testing answers with 5-way annotations

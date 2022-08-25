@@ -1,3 +1,4 @@
+import pstats
 import pandas as pd
 import sys
 import os
@@ -32,7 +33,7 @@ def write_classification_statistics(filepath, y_true, y_pred, qwk):
 # num_labels: Steps in training sizes are n*num_labels until maximum possible sample size
 # num_samples: How many training subsets to sample per training size
 # upsample_training: Only takes effect when sampling_strategy is 'balanced' and num_labels > number of actually present labels; Creating as-balanced-as-possible training sets in steps of num_labels
-def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=50, upsample_training=False, num_samples=20):
+def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None):
 
     target_path = os.path.join(results_folder, dataset_name, sampling_strategy, prompt_name, method)
     if not os.path.exists(target_path):
@@ -71,7 +72,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
     logging.info("Validation: "+val_path+ " ("+str(num_val)+" instances in total)")
     logging.info("Testing: "+test_path+ " ("+str(num_test)+" instances in total)")
 
-    # Determine training sizes
+    # Determine training sizes based on available data and sampling strategy
     if sampling_strategy == 'balanced':
 
         # For balanced training: Ensure that every label is represented at least once (= as many labels in target column as num_labels)
@@ -96,23 +97,62 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
             # For balanced training, maximum training size is limited by least frequent label
             max_training_size = lowest_count*len(labels_in_target)
 
-            # If a maximum size was specified and does not exceed the maximum possible size: Apply it
-            if (max_size is not None) and (max_size < max_training_size):
-                max_training_size = max_size
+            # If predetermined training sizes were passed: Use these and check whether there is enough data to perform all of them
+            if predetermined_train_sizes is not None:
+                logging.info("A predetermined array of training sizes was passed, deciding whether we can calculate all of the requested sizes with the available data.")
+                logging.info("Predetermined training sizes: "+str(predetermined_train_sizes))
 
-            # Lowest: One per label, highest: max_training_size, in steps of num_labels
-            train_sizes = list(range(num_labels, max_training_size + 1, num_labels))
+                if max_size is not None:
+                    logging.warn("Maximum training size (max_size) was set to '"+str(max_size)+"', but you also passed an array of predetermined training sizes. Ignoring max_size!") 
+
+                # Remove all sizes that would exceed the available data
+                while predetermined_train_sizes[-1] > max_training_size:
+                    predetermined_train_sizes.pop()
+                
+                train_sizes = predetermined_train_sizes
+
+
+            # If no predetermined training sizes were passed, determine them based on the available data
+            else:
+                logging.info("Determining training sizes based on available data.")
+
+                # If a maximum size was specified and does not exceed the maximum possible size: Apply it
+                if (max_size is not None) and (max_size < max_training_size):
+                    max_training_size = max_size
+
+                # Lowest: One per label, highest: max_training_size, in steps of num_labels
+                train_sizes = list(range(num_labels, max_training_size + 1, num_labels))
 
             # Just to log that training samples will not be perfectly balanced
             if len(labels_in_target) < num_labels:
                 logging.info("Number of labels in training data not equal to specified 'num_labels': Specified: "+str(num_labels)+" Present: "+str(len(labels_in_target))+". Because 'upsample_training' was set to 'True', training data will be upsampled to fit 'train_size' steps.")
-                print("Less labels in training than number of specified labels, but 'upsample_training' is set to True, therfore upsampling!")
+                print("Less labels in training than number of specified labels, but 'upsample_training' is set to True, therefore upsampling!")
 
     elif sampling_strategy == 'random':
-        # If no max_size was specified or max_size exceeds maximum possible size, run for as many as possible
-        if (max_size is None) or (max_size > len(df_train)):
-            max_size = len(df_train)
-        train_sizes = list(range(num_labels, max_size + 1, num_labels))
+
+        # If predetermined training sizes were passed: Use these and check whether there is enough data to perform all of them
+        if predetermined_train_sizes is not None:
+            logging.info("A predetermined array of training sizes was passed, deciding whether we can calculate all of the requested sizes with the available data.")
+            logging.info("Predetermined training sizes: "+str(predetermined_train_sizes))
+
+            if max_size is not None:
+                logging.warn("Maximum training size (max_size) was set to '"+str(max_size)+"', but you also passed an array of predetermined training sizes. Ignoring max_size!") 
+
+            # Remove all sizes that would exceed the available data
+            while predetermined_train_sizes[-1] > max_training_size:
+                predetermined_train_sizes.pop()
+
+            train_sizes = predetermined_train_sizes
+
+        
+        # If no predetermined training sizes were passed, determine them based on the available data
+        else:
+            logging.info("Determining training sizes based on available data.")
+
+            # If no max_size was specified or max_size exceeds maximum possible size, run for as many as possible
+            if (max_size is None) or (max_size > len(df_train)):
+                max_size = len(df_train)
+            train_sizes = list(range(num_labels, max_size + 1, num_labels))
     
     else:
         print("Unknown sampling strategy:", sampling_strategy, "! Please choose either 'balanced' or 'random'!")
@@ -121,6 +161,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
 
     logging.info("Training sizes: "+str(train_sizes))
     print("Training sizes: "+str(train_sizes))
+    sys.exit(0)
     
     # There are configurations where no run is possible
     if len(train_sizes) > 0:

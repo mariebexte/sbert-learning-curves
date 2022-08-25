@@ -5,8 +5,8 @@ import numpy as np
 import sys
 
 # Predefined colors for the different methods for ease of comparison across curves
-colors = {"SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
-          "SBERT_10e": "blue", "SBERT_large": "purple", "SBERT_small": "blue", "BERT_150": "red", "BERT_4": "purple", "SBERT_150": "lime", "SBERT_4": "deepskyblue"}
+colors = {"SBERT_noval": "deepskyblue", "BERT_10e": "red", "BERT_oldConfig": "red", "SBERT_wrongVal": "lime", "SBERT_wrongVal_max": "deepskyblue", "SBERT_valFixed": "lime", "SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
+          "SBERT_10e": "purple", "SBERT_larger": "purple", "SBERT_smaller": "blue", "BERT_150": "red", "BERT_4": "purple", "SBERT_150": "lime", "SBERT_4": "deepskyblue"}
 # Predefined line styles for the different sampling strategies          
 strategies = {"balanced": ":", "random": "--"}
 
@@ -236,8 +236,9 @@ def dataset_curve(dataset_path, eval_measure):
 
     # Reduce columns to just the training sizes for easier plotting
     train_sizes = overall_results.columns.tolist()
-    train_sizes.remove("method")
-    train_sizes.remove("strategy")
+    if len(overall_results) > 0:
+        train_sizes.remove("method")
+        train_sizes.remove("strategy")
 
     # Plot the individual averaged results
     for _, row in overall_results.iterrows():
@@ -272,8 +273,8 @@ def dataset_curve(dataset_path, eval_measure):
     plt.close()
 
 
-dataset_curve("FINAL_RESULTS/fin_results/SRA-2way", "weighted_f1")
-dataset_curve("FINAL_RESULTS/fin_results/SRA-5way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP/fin_results/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP/fin_results/SRA-5way", "weighted_f1")
 
 #dataset_curve("FINAL_RESULTS/fin_results_SBERTmodelComparison/SRA-2way", "weighted_f1")
 #dataset_curve("FINAL_RESULTS/fin_results_SBERTmodelComparison/SRA-5way", "weighted_f1")
@@ -283,3 +284,23 @@ dataset_curve("FINAL_RESULTS/fin_results/SRA-5way", "weighted_f1")
 
 #dataset_curve("FINAL_RESULTS/fin_results_ASAPval/ASAP", "QWK")
 
+# dataset_curve("RESULTS_PRELIM_EXP/fin_results_SBERT_VAL-FIXED/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP/fin_results_SBERT_VAL-FIXED/SRA-5way", "weighted_f1")
+
+# dataset_curve("RESULTS_PRELIM_EXP/fin_results_BERT_COMPARE-CONFIG/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP/fin_results_BERT_COMPARE-CONFIG/SRA-5way", "weighted_f1")
+
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-models/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-models/SRA-5way", "weighted_f1")
+
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-10e/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-10e/SRA-5way", "weighted_f1")
+
+dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-2way", "weighted_f1")
+dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-5way", "weighted_f1")
+
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-noval/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-noval/SRA-5way", "weighted_f1")
+
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-5way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-2way", "weighted_f1")
