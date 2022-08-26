@@ -147,7 +147,8 @@ def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target
         evaluation_strategy="epoch",
         logging_strategy="epoch",
         save_strategy="epoch",
-        save_total_limit=5,
+        #weight_decay=0.01,
+        #learning_rate=2e-5,
     )
 
     trainer = Trainer(
@@ -161,7 +162,7 @@ def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target
 
     trainer.train()
 
-    # Trainer automatically loads best model at this point (because load_best_model_at_end = True)
+    # Trainer automatically loads best model at this point (because load_best_model_at_end == True)
     pred = trainer.predict(test_dataset)
     predictions = pred.predictions.argmax(axis=1)
     if labels_are_string:

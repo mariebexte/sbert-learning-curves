@@ -5,7 +5,7 @@ import numpy as np
 import sys
 
 # Predefined colors for the different methods for ease of comparison across curves
-colors = {"SBERT_noval": "deepskyblue", "BERT_10e": "red", "BERT_oldConfig": "red", "SBERT_wrongVal": "lime", "SBERT_wrongVal_max": "deepskyblue", "SBERT_valFixed": "lime", "SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
+colors = {"BERT_old": "green", "BERT_new": "orange", "BERT_old_save2": "green", "BERT_new_save2": "blue", "SBERT_noval": "deepskyblue", "BERT_10e": "red", "BERT_oldConfig": "red", "SBERT_wrongVal": "lime", "SBERT_wrongVal_max": "deepskyblue", "SBERT_valFixed": "lime", "SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
           "SBERT_10e": "purple", "SBERT_larger": "purple", "SBERT_smaller": "blue", "BERT_150": "red", "BERT_4": "purple", "SBERT_150": "lime", "SBERT_4": "deepskyblue"}
 # Predefined line styles for the different sampling strategies          
 strategies = {"balanced": ":", "random": "--"}
@@ -296,11 +296,14 @@ def dataset_curve(dataset_path, eval_measure):
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-10e/SRA-2way", "weighted_f1")
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-10e/SRA-5way", "weighted_f1")
 
-dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-2way", "weighted_f1")
-dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-5way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-5way", "weighted_f1")
 
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-noval/SRA-2way", "weighted_f1")
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-noval/SRA-5way", "weighted_f1")
 
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-5way", "weighted_f1")
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-2way", "weighted_f1")
+
+dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-5way", "weighted_f1")
+dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-2way", "weighted_f1")

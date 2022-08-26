@@ -8,11 +8,11 @@ from datetime import datetime
 from copy import deepcopy
 
 from regex import F
-from train_shallow import train_shallow
+from learning_curve.train_shallow import train_shallow
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report, f1_score
-from plot_learning_curve import plot_learning_curve
-from train_sbert import train_sbert
-from train_bert import train_bert
+from learning_curve.plot_learning_curve import plot_learning_curve
+from learning_curve.train_sbert import train_sbert
+from learning_curve.train_bert import train_bert
 
 target_column = "label"
 results_folder = "results"
@@ -161,7 +161,6 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
 
     logging.info("Training sizes: "+str(train_sizes))
     print("Training sizes: "+str(train_sizes))
-    sys.exit(0)
     
     # There are configurations where no run is possible
     if len(train_sizes) > 0:
@@ -347,13 +346,3 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
         # For SBERT also plot curve of results obtained using the max strategy
         if method == "SBERT":
             plot_learning_curve(path=target_path, dataset_name=dataset_name, sampling_strategy=sampling_strategy, prompt_name=prompt_name, method_name=method+"-max", eval_measure=eval_measure, df_preds=df_results_max)
-
-
-# run(dataset_name="SRA-5way", prompt_name="EM-inv1-45b", train_path="data/SRA_5way/SEB/EM-inv1-45b/train.csv", val_path="data/SRA_5way/SEB/EM-inv1-45b/val.csv", test_path="data/SRA_5way/SEB/EM-inv1-45b/test-unseen-answers.csv", method="RF", eval_measure="weighted_f1", sampling_strategy="random", num_labels=5)
-# run(dataset_name="SRA-5way", prompt_name="EM-inv1-45b", train_path="data/SRA_5way/SEB/EM-inv1-45b/train.csv", val_path="data/SRA_5way/SEB/EM-inv1-45b/val.csv", test_path="data/SRA_5way/SEB/EM-inv1-45b/test-unseen-answers.csv", method="LR", eval_measure="weighted_f1", sampling_strategy="random", num_labels=5)
-# run(dataset_name="SRA-5way", prompt_name="EM-inv1-45b", train_path="data/SRA_5way/SEB/EM-inv1-45b/train.csv", val_path="data/SRA_5way/SEB/EM-inv1-45b/val.csv", test_path="data/SRA_5way/SEB/EM-inv1-45b/test-unseen-answers.csv", method="SVM", eval_measure="weighted_f1", sampling_strategy="random", num_labels=5)
-# run(dataset_name="SRA-5way", prompt_name="EM-inv1-45b", train_path="data/SRA_5way/SEB/EM-inv1-45b/train.csv", val_path="data/SRA_5way/SEB/EM-inv1-45b/val.csv", test_path="data/SRA_5way/SEB/EM-inv1-45b/test-unseen-answers.csv", method="RF", eval_measure="weighted_f1", sampling_strategy="balanced", num_labels=5)
-# run(dataset_name="SRA-5way", prompt_name="EM-inv1-45b", train_path="data/SRA_5way/SEB/EM-inv1-45b/train.csv", val_path="data/SRA_5way/SEB/EM-inv1-45b/val.csv", test_path="data/SRA_5way/SEB/EM-inv1-45b/test-unseen-answers.csv", method="BERT", eval_measure="weighted_f1", sampling_strategy="random", num_labels=5, num_samples=3, max_size=15)
-# run(dataset_name="SRA-5way", prompt_name="EM-inv1-45b", train_path="data/SRA_5way/SEB/EM-inv1-45b/train.csv", val_path="data/SRA_5way/SEB/EM-inv1-45b/val.csv", test_path="data/SRA_5way/SEB/EM-inv1-45b/test-unseen-answers.csv", method="SBERT", eval_measure="weighted_f1", sampling_strategy="random", num_labels=5, num_samples=3, max_size=15)
-
-#run(dataset_name="ASAP_val150", prompt_name="2", train_path="data/ASAP/2/asap_2_train.csv", val_path="data/ASAP/2/asap_2_val.csv", test_path="data/ASAP/2/asap_2_test.csv", method="LR", eval_measure="QWK", sampling_strategy="balanced", max_size=50, upsample_training=True, num_labels=5, num_samples=20)

@@ -12,6 +12,7 @@ data_folder = "data"
 # Desired order of columns in final files
 data_columns = ["prompt", "id", "text", "label"]
 
+# Random state to split data
 state=4334
 
 
@@ -74,9 +75,10 @@ def split_asap():
         df_prompt = df_train[df_train["prompt"] == prompt]
         df_val = df_prompt.sample(val_size, random_state=state)
 
+        # If we end up with validation instances that all have the same label: Sample again
         num_try = 1
         while not has_at_least_two_labels(df_val):
-            print("NOT DIVERSE", prompt, df_val)
+            print("VAL IS NOT DIVERSE", prompt, df_val)
             df_val = df_prompt.sample(val_size, random_state=state+num_try)
             num_try += 1
         if num_try > 1:
@@ -165,6 +167,8 @@ def write_SRA_train_val(two_way_path, five_way_path, subset, train_path, val_siz
 
         # Sample val_size instances of the data for validation, rest becomes train
         df_val = df_prompt.sample(val_size, random_state=state)
+
+        # If we end up with validation instances that all have the same label: Sample again
         num_try = 1
         while not has_at_least_two_labels(df_val):
             print("NOT DIVERSE", prompt, df_val)
