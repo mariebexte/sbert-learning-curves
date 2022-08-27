@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 def plot_learning_curve(path, dataset_name, sampling_strategy, prompt_name, method_name, eval_measure, df_preds, ylim=[0,1]):
 
     train_sizes=df_preds.columns
+    prompt_name = prompt_name.replace("/", "-")
 
     # In case of QWK, have to fisther transform before averaging
     if eval_measure.lower() == "qwk":

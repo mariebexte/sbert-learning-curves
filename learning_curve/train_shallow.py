@@ -7,7 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 import nltk
 import pandas as pd
-# nltk.download('punkt')
+nltk.download('punkt')
 
 
 def train_shallow(method, df_train, df_test, df_val=None, answer_column="text", target_column="label"):

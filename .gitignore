@@ -8,3 +8,5 @@ __pycache__
 _analysis
 REDO_BERT
 REDO_SBERT_MODELS
+EXP_RESULTS
+EXP_RUNS

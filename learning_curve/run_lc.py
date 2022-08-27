@@ -139,7 +139,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
                 logging.warn("Maximum training size (max_size) was set to '"+str(max_size)+"', but you also passed an array of predetermined training sizes. Ignoring max_size!") 
 
             # Remove all sizes that would exceed the available data
-            while predetermined_train_sizes[-1] > max_training_size:
+            while predetermined_train_sizes[-1] > len(df_train):
                 predetermined_train_sizes.pop()
 
             train_sizes = predetermined_train_sizes

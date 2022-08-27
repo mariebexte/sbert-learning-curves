@@ -1,5 +1,6 @@
-Beetle/FaultFinding-BULB_ONLY_EXPLAIN_WHY4
-Beetle/FaultFinding-VOLTAGE_GAP_EXPLAIN_WHY3
+SEB/PS-inv1-45b
+SEB/PS-inv1-2a
+SEB/PS-inv2-44
 SEB/ME-post-73
 SEB/ME-inv4-10
 SEB/ME-post-65a
@@ -120,7 +121,6 @@ SEB/PS-post-46b
 SEB/SE-inv3-22b
 SEB/ST-inv1-54b3
 SEB/VB-inv2-40a
-Beetle/FaultFinding-VOLTAGE_GAP_EXPLAIN_WHY5
 SEB/II-inv1-26
 SEB/LF-inv2-31b
 SEB/LP-inv4-16d
@@ -132,5 +132,4 @@ SEB/ST-inv1-58
 SEB/MX-inv4-41
 SEB/ME-inv1-28b
 SEB/MX-inv1-1
-Beetle/FaultFinding-VOLTAGE_GAP_EXPLAIN_WHY6
 SEB/MX-inv1-24

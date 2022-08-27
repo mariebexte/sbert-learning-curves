@@ -10,9 +10,7 @@ Beetle/SwitchesBulbsSeries-CONDITIONS_FOR_BULB_TO_LIGHT
 Beetle/FaultFinding-TERMINAL_STATE_EXPLAIN_Q
 Beetle/FaultFinding-VOLTAGE_DIFF_DISCUSS_1_Q
 Beetle/FaultFinding-BULB_C_VOLTAGE_EXPLAIN_WHY1
-SEB/PS-inv1-45b
 Beetle/SwitchesBulbsSeries-SWITCH_OPEN_EXPLAIN_Q
-SEB/PS-inv1-2a
 Beetle/SwitchesBulbsSeries-SHORT_CIRCUIT_EXPLAIN_Q_2
 Beetle/SwitchesBulbsParallel-SWITCH_TABLE_EXPLAIN_Q1
 Beetle/SwitchesBulbsSeries-GIVE_CIRCUIT_TYPE_SERIES_EXPLAIN_Q
@@ -43,4 +41,7 @@ Beetle/SwitchesBulbsSeries-SHORT_CIRCUIT_EXPLAIN_Q_4
 Beetle/SwitchesBulbsParallel-SWITCH_TABLE_EXPLAIN_Q2
 Beetle/FaultFinding-BULB_C_VOLTAGE_EXPLAIN_WHY2
 Beetle/SwitchesBulbsParallel-GIVE_CIRCUIT_TYPE_HYBRID_EXPLAIN_Q2
-SEB/PS-inv2-44
+Beetle/FaultFinding-BULB_ONLY_EXPLAIN_WHY4
+Beetle/FaultFinding-VOLTAGE_GAP_EXPLAIN_WHY3
+Beetle/FaultFinding-VOLTAGE_GAP_EXPLAIN_WHY5
+Beetle/FaultFinding-VOLTAGE_GAP_EXPLAIN_WHY6
