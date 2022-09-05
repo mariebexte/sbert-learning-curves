@@ -75,6 +75,13 @@ def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target
     if torch.cuda.is_available():
         device = 'cuda'
 
+    # If all training instances have the same label: Return this label as prediction for all testing instances
+    if len(df_train[target_column].unique()) == 1:
+        target_label = list(df_train[target_column].unique())
+        logging.warn("All training instances have the same label '"+str(target_label[0])+"'. Predicting this label for all testing instances!")
+        print("All training instances have the same label '"+str(target_label[0])+"'. Predicting this label for all testing instances!")
+        return target_label*len(df_test)
+
     # Model evaluation throws error if val/test data contains more labels than train
     labels_in_training = df_train[target_column].unique().tolist()
     labels_in_validation = df_val[target_column].unique().tolist()

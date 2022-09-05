@@ -16,7 +16,7 @@ with open('SRA_Beetle.txt', 'r') as prompts:
         val_path=os.path.join(base_path, str(prompt), "val.csv"),
         test_path=os.path.join(base_path, str(prompt), "test-unseen-answers.csv"),
         method="BERT",
-        eval_measure="weighted_f1"
+        eval_measure="weighted_f1",
         sampling_strategy="random",
         num_labels=2,
         predetermined_train_sizes=deepcopy(train_sizes))

@@ -10,7 +10,7 @@ with open('SRA_Beetle.txt', 'r') as prompts:
     for prompt in prompts:
 
         prompt=prompt.strip()
-        run(dataset_name="SRA-5way",
+        run(dataset_name="SRA_5way",
         prompt_name=str(prompt),
         train_path=os.path.join(base_path, str(prompt), "train.csv"),
         val_path=os.path.join(base_path, str(prompt), "val.csv"),
