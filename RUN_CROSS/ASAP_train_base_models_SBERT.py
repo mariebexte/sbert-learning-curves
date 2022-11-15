@@ -1,0 +1,3 @@
+from learning_curve.train_asap_base_models import train_base_models_sbert
+
+train_base_models_sbert()

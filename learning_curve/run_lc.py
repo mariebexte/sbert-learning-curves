@@ -6,6 +6,7 @@ import random
 import logging
 from datetime import datetime
 from copy import deepcopy
+import torch
 
 from regex import F
 from learning_curve.train_shallow import train_shallow
@@ -13,6 +14,9 @@ from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, 
 from learning_curve.plot_learning_curve import plot_learning_curve
 from learning_curve.train_sbert import train_sbert
 from learning_curve.train_bert import train_bert
+from learning_curve.baselines import get_predictions
+from learning_curve.pretrained_SBERT import get_predictions_pretrained
+from sentence_transformers import SentenceTransformer
 
 target_column = "label"
 results_folder = "results"
@@ -33,7 +37,7 @@ def write_classification_statistics(filepath, y_true, y_pred, qwk):
 # num_labels: Steps in training sizes are n*num_labels until maximum possible sample size
 # num_samples: How many training subsets to sample per training size
 # upsample_training: Only takes effect when sampling_strategy is 'balanced' and num_labels > number of actually present labels; Creating as-balanced-as-possible training sets in steps of num_labels
-def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None):
+def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None, bert_base="bert-base-uncased", sbert_base="all-MiniLM-L6-v2"):
 
     target_path = os.path.join(results_folder, dataset_name, sampling_strategy, prompt_name, method)
     if not os.path.exists(target_path):
@@ -171,7 +175,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
         df_results = pd.DataFrame(columns=actual_train_sizes)
 
         # For SBERT: Keep second dataframe with results obtained using max strategy, default is avg
-        if method == "SBERT":
+        if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
             df_results_max = pd.DataFrame(columns=actual_train_sizes)
 
         # For each of the different training data sizes:
@@ -184,7 +188,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
             train_size_results = []
 
             # For SBERT: Keep second list of results obtained using max strategy, default is avg
-            if method == "SBERT":
+            if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
                 train_size_results_max = []
 
             # Run num_sample runs for the current training size
@@ -272,11 +276,26 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
                     y_pred = train_shallow(method=method, df_train=df_train_subset, df_val=df_val, df_test=df_test)
 
                 elif method == "BERT":
-                    y_pred = train_bert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test)
+                    y_pred = train_bert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test, base_model=bert_base)
 
                 elif method == "SBERT":
                     # Returns predictions obtained using max and avg (default) strategy
-                    y_pred_max, y_pred = train_sbert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test)
+                    y_pred_max, y_pred = train_sbert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test, base_model=sbert_base)
+
+                elif method in ["edit", "overlap", "cosine"]:
+                    y_pred_max, y_pred = get_predictions(method=method, df_train=df_train_subset, df_val=df_val, df_test=df_test)
+
+                elif method == "pretrained":
+
+                    pretrained_model = None
+                    if method == "pretrained":
+                        device = "cpu"
+                        #device = "mps"
+                        if torch.cuda.is_available():
+                            device = "cuda"
+                        pretrained_model = SentenceTransformer(sbert_base, device=device)
+
+                    y_pred_max, y_pred = get_predictions_pretrained(df_train=df_train_subset, df_val=df_val, df_test=df_test, model=pretrained_model)
 
                 else:
                     logging.error("Unknown prediction method: ", method, "! Please choose one of the following: 'LR', 'RF', 'SVM', 'BERT', 'SBERT'!")
@@ -289,14 +308,14 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
                 qwk = cohen_kappa_score(y_true, y_pred, weights='quadratic')
                 weighted_f1 = f1_score(y_true=y_true, y_pred=y_pred, average='weighted')
                 # For SBERT: Also calculate QWK and weighted F1 for predictions obtained using max strategy
-                if method == "SBERT":
+                if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
                     qwk_max = cohen_kappa_score(y_true, y_pred_max, weights='quadratic')
                     weighted_f1_max = f1_score(y_true=y_true, y_pred=y_pred_max, average='weighted')
 
                 # Write classification statistics to file
                 write_classification_statistics(filepath=os.path.join(run_path, "results.txt"), y_true=y_true, y_pred=y_pred, qwk=qwk)
                 # For SBERT: Also write classification statistics for predictions obtained using max strategy
-                if method == "SBERT":
+                if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
                     write_classification_statistics(filepath=os.path.join(run_path, "results_max.txt"), y_true=y_true, y_pred=y_pred_max, qwk=qwk_max)
 
                 # Write training instances to file
@@ -306,7 +325,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
                 df_predictions = pd.DataFrame({'id': list(df_test["id"]), 'y_true': y_true, 'y_pred': y_pred})
                 df_predictions.to_csv(os.path.join(run_path, "predictions.csv"), index=None)
                 # For SBERT: Also write predictions obtained using max strategy
-                if method == "SBERT":
+                if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
                     df_predictions_max = pd.DataFrame({'id': list(df_test["id"]), 'y_true': y_true, 'y_pred': y_pred_max})
                     df_predictions_max.to_csv(os.path.join(run_path, "predictions_max.csv"), index=None)
 
@@ -314,13 +333,13 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
                 if eval_measure == 'QWK':
                     train_size_results.append(qwk)
                     # For SBERT: Also append to training size results for predictions obtained using the max strategy
-                    if method == "SBERT":
+                    if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
                         train_size_results_max.append(qwk_max)
 
                 elif eval_measure == 'weighted_f1':
                     train_size_results.append(weighted_f1)
                     # For SBERT: Also append to training size results for predictions obtained using the max strategy
-                    if method == "SBERT":
+                    if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
                         train_size_results_max.append(weighted_f1_max)
 
                 else:
@@ -337,12 +356,12 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
             # Save, to avoid results in case run is terminated prematurely
             df_results.to_csv(os.path.join(target_path, eval_measure + "_lc_results.csv"), index = None)
             # For SBERT: Also append to and save results dataframe for predictions obtained using the max strategy
-            if method == "SBERT":
+            if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
                 df_results_max[train_size+num_val] = train_size_results_max
                 df_results_max.to_csv(os.path.join(target_path, eval_measure + "_lc_results_max.csv"), index = None)
 
         # Once all runs for all training sizes are finished, plot learning curve
         plot_learning_curve(path=target_path, dataset_name=dataset_name, sampling_strategy=sampling_strategy, prompt_name=prompt_name, method_name=method, eval_measure=eval_measure, df_preds=df_results)
         # For SBERT also plot curve of results obtained using the max strategy
-        if method == "SBERT":
+        if method in ["SBERT", "edit", "overlap", "pretrained", "cosine"]:
             plot_learning_curve(path=target_path, dataset_name=dataset_name, sampling_strategy=sampling_strategy, prompt_name=prompt_name, method_name=method+"-max", eval_measure=eval_measure, df_preds=df_results_max)

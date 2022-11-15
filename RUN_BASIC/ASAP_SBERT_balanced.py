@@ -1,5 +1,8 @@
-from learning_curve.run_lc import run
+import sys
 import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+from learning_curve.run_lc import run
 from copy import deepcopy
 
 train_sizes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]

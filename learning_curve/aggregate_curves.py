@@ -6,9 +6,10 @@ import sys
 
 # Predefined colors for the different methods for ease of comparison across curves
 colors = {"BERT_old": "green", "BERT_new": "orange", "BERT_old_save2": "green", "BERT_new_save2": "blue", "SBERT_noval": "deepskyblue", "BERT_10e": "red", "BERT_oldConfig": "red", "SBERT_wrongVal": "lime", "SBERT_wrongVal_max": "deepskyblue", "SBERT_valFixed": "lime", "SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
-          "SBERT_10e": "purple", "SBERT_larger": "purple", "SBERT_smaller": "blue", "BERT_150": "red", "BERT_4": "purple", "SBERT_150": "lime", "SBERT_4": "deepskyblue"}
+          "SBERT_half": "red", "SBERT_10e": "purple", "SBERT_larger": "purple", "SBERT_smaller": "blue", "BERT_150": "red", "BERT_4": "purple", "SBERT_150": "lime", "SBERT_4": "deepskyblue",
+          "edit": "red", "overlap": "blue", "cosine": "orange", "pretrained": "deepskyblue", "LR_easyadapt": "blue", "LR_merge": "green"}
 # Predefined line styles for the different sampling strategies          
-strategies = {"balanced": ":", "random": "--"}
+strategies = {"balanced": "-", "random": '--', "avg": "-", "max": "--"}
 
 
 # Method to average a dataframe while respecting the requirements of the respective metric, i.e. Fisher transforming in case of QWK
@@ -29,7 +30,7 @@ def get_average(df, eval_metric):
 
 
 # Path to results for a certain prompts (expected to contain subdirs with results of the different methods)
-def prompt_curve(prompt_dir, dataset_name, sampling_strategy,eval_measure):
+def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
 
     prompt_name = os.path.basename(prompt_dir)
     # Dataframe to collect average results of the different methods
@@ -246,7 +247,7 @@ def dataset_curve(dataset_path, eval_measure):
         method = row["method"]
         strategy = row["strategy"]
         row = row[train_sizes]
-        plt.plot(train_sizes, row.tolist(), strategies[strategy], color=colors[method], label=method+"_"+strategy)
+        plt.plot(train_sizes, row.tolist(), linestyle=strategies[strategy], color=colors[method], label=method+"_"+strategy)
 
 
     plt.title(dataset_name, fontsize=12)
@@ -257,7 +258,7 @@ def dataset_curve(dataset_path, eval_measure):
     plt.grid(linewidth = 0.1)
 
     plt.rcParams['savefig.dpi'] = 300
-    plt.rc('legend', fontsize=4, handlelength=1)
+    plt.rc('legend', fontsize=4, handlelength=3)
     plt.legend(loc="lower right")
     #plt.xscale('log')
 
@@ -305,5 +306,17 @@ def dataset_curve(dataset_path, eval_measure):
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-5way", "weighted_f1")
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-2way", "weighted_f1")
 
-dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-5way", "weighted_f1")
-dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-2way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-5way", "weighted_f1")
+# dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-2way", "weighted_f1")
+
+# dataset_curve("EXP_RESULTS_SEP_DATASETS/ASAP", "QWK")
+# dataset_curve("EXP_RESULTS_SEP_DATASETS/Beetle/SRA_2way", "weighted_f1")
+# dataset_curve("EXP_RESULTS_SEP_DATASETS/Beetle/SRA_5way", "weighted_f1")
+# dataset_curve("EXP_RESULTS_SEP_DATASETS/SEB/SRA_2way", "weighted_f1")
+# dataset_curve("EXP_RESULTS_SEP_DATASETS/SEB/SRA_5way", "weighted_f1")
+
+# dataset_curve("RESULTS_FULL_ASAP_LONG/ASAP", "QWK")
+dataset_curve("RESULTS_CROSS_FINAL/ASAP/base_1/ASAP", "QWK")
+
+# dataset_curve("EXP_RESULTS/SRA_5way", "weighted_f1")
+# dataset_curve("EXP_RESULTS/SRA_2way", "weighted_f1")

@@ -1,0 +1,3 @@
+from learning_curve.run_asap_cross_prompt import cross_sbert_pretrained
+
+cross_sbert_pretrained()

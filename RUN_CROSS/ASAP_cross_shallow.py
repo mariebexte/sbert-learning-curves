@@ -1,0 +1,3 @@
+from learning_curve.run_asap_cross_prompt_shallow import cross_shallow
+
+cross_shallow()

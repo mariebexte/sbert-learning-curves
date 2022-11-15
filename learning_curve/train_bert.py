@@ -67,7 +67,7 @@ def compute_metrics(pred):
     }
 
 
-def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target_column="label", base_model="bert-base-uncased", num_epochs=20, batch_size=8, do_warmup=False):
+def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target_column="label", base_model="bert-base-uncased", num_epochs=20, batch_size=8, do_warmup=False, save_model=False):
 
     max_length = 512
 
@@ -142,7 +142,8 @@ def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target
         num_warm_steps = round(0.1*total_num_steps)
 
     # Load model and pass to device
-    model = BertForSequenceClassification.from_pretrained(base_model, num_labels=len(label_set)).to(device)
+    model = BertForSequenceClassification.from_pretrained(base_model, num_labels=len(label_set), ignore_mismatched_sizes=True).to(device)
+    model.train()
 
     training_args = TrainingArguments(
         output_dir=os.path.join(run_path, 'checkpoints'),   # Output directory to save model, will be deleted after evaluation
@@ -154,6 +155,7 @@ def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target
         evaluation_strategy="epoch",
         logging_strategy="epoch",
         save_strategy="epoch",
+        save_total_limit=5,
         #weight_decay=0.01,
         #learning_rate=2e-5,
     )
@@ -174,6 +176,10 @@ def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target
     predictions = pred.predictions.argmax(axis=1)
     if labels_are_string:
         predictions = [int_to_label[pred] for pred in predictions]
+
+    if save_model == True:
+        trainer.save_model(os.path.join(run_path, "best_model"))
+        tokenizer.save_pretrained(os.path.join(run_path, "best_model"))
 
     # Delete model checkpoints to save space
     if os.path.exists(os.path.join(run_path, "checkpoints")):
