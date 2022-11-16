@@ -9,7 +9,7 @@ from copy import deepcopy
 import torch
 
 from regex import F
-from learning_curve.train_shallow import train_shallow
+from learning_curve.train_shallow_cross import train_shallow_cross
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report, f1_score
 from learning_curve.plot_learning_curve import plot_learning_curve
 from learning_curve.train_sbert import train_sbert
@@ -36,7 +36,7 @@ def write_classification_statistics(filepath, y_true, y_pred, qwk):
 # num_labels: Steps in training sizes are n*num_labels until maximum possible sample size
 # num_samples: How many training subsets to sample per training size
 # upsample_training: Only takes effect when sampling_strategy is 'balanced' and num_labels > number of actually present labels; Creating as-balanced-as-possible training sets in steps of num_labels
-def run_cross(results_folder, dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None, bert_base="bert-base-uncased", sbert_base="all-MiniLM-L6-v2"):
+def run_cross(results_folder, dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None, bert_base="bert-base-uncased", sbert_base="all-MiniLM-L6-v2", shallow_cross_df=None, shallow_cross_method=None):
 
     target_path = os.path.join(results_folder, dataset_name, sampling_strategy, prompt_name, method)
     if not os.path.exists(target_path):
@@ -272,7 +272,7 @@ def run_cross(results_folder, dataset_name, prompt_name, train_path, val_path, t
 
                 # Tain model and get predictions
                 if method in ["LR", "RF", "SVM"]:
-                    y_pred = train_shallow(method=method, df_train=df_train_subset, df_val=df_val, df_test=df_test)
+                    y_pred = train_shallow_cross(method=method, df_cross=shallow_cross_df, df_train=df_train_subset, df_val=df_val, df_test=df_test, cross_method=shallow_cross_method)
 
                 elif method == "BERT":
                     y_pred = train_bert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test, base_model=bert_base)

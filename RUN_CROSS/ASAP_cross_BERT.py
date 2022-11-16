@@ -1,3 +1,43 @@
-from learning_curve.run_asap_cross_prompt import cross_bert
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
-cross_bert()
+from learning_curve.run_lc_cross import run_cross
+from copy import deepcopy
+import pandas as pd
+
+seed = 1234
+num_train = 1250
+
+train_sizes=[5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+base_path="data/ASAP"
+
+# Neural models:
+# Must call run_lc, but with differing base models & training data
+bert_model_dir = "ASAP_BASE_MODELS/BERT/ASAP"
+
+# Base model
+for base_prompt in range(1, 11):
+
+    target_prompts = list(range(1, 11))
+    target_prompts.remove(base_prompt)
+
+    for target_prompt in target_prompts:
+
+        print(base_prompt, target_prompt)
+
+        base_model_path = os.path.join(bert_model_dir, str(base_prompt), "best_model")
+
+        run_cross(results_folder=os.path.join("results_cross", "ASAP", "base_"+str(base_prompt)),
+        dataset_name="ASAP",
+        prompt_name=str(target_prompt),
+        train_path=os.path.join(base_path, str(target_prompt), "train.csv"),
+        val_path=os.path.join(base_path, str(target_prompt), "val.csv"),
+        test_path=os.path.join(base_path, str(target_prompt), "test.csv"),
+        method="BERT",
+        eval_measure="QWK",
+        sampling_strategy="random",
+        num_labels=5,
+        upsample_training=True,
+        predetermined_train_sizes=deepcopy(train_sizes),
+        bert_base=base_model_path)
