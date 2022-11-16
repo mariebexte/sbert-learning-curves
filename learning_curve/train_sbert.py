@@ -50,7 +50,13 @@ def eval_sbert(df_test, df_ref, id_column, answer_column, target_column):
     return max_predictions, avg_predictions
 
 
-def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", target_column="label", id_column="id", base_model="all-MiniLM-L6-v2", num_epochs=5, batch_size=8, do_warmup=False):
+# For larger amounts of training data: Do not create all possible pairs, but limit to a fixed number per epoch (if possible, have different pairs across different epochs)
+def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", target_column="label", id_column="id", base_model="all-MiniLM-L6-v2", num_epochs=5, batch_size=8, do_warmup=False, num_pairs_per_example=None, save_model=False):
+
+    if num_pairs_per_example is not None:
+        num_samples = len(df_train) * num_pairs_per_example
+        num_batches_per_round = int(num_samples/batch_size)
+        logging.info("LIMITING SBERT TRAINING PAIRS: "+str(num_pairs_per_example)+" pairs per sample!")
 
     device = "cpu"
     #device = "mps"
@@ -106,7 +112,10 @@ def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", targe
         num_warm_steps = round(0.1*total_num_steps)
 
     # Tune the model
-    model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=num_epochs, warmup_steps=num_warm_steps, evaluator=evaluator, output_path=model_path, save_best_model=True, show_progress_bar=True)
+    if num_pairs_per_example is not None:
+        model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=num_epochs, warmup_steps=num_warm_steps, evaluator=evaluator, output_path=model_path, save_best_model=True, show_progress_bar=True, steps_per_epoch=num_batches_per_round)
+    else:
+        model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=num_epochs, warmup_steps=num_warm_steps, evaluator=evaluator, output_path=model_path, save_best_model=True, show_progress_bar=True)
 
     logging.info("SBERT number of epochs: "+str(num_epochs))
     logging.info("SBERT batch size: "+str(batch_size))
@@ -131,7 +140,7 @@ def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", targe
         shutil.copyfile(os.path.join(model_path, "eval", "similarity_evaluation_results.csv"), os.path.join(run_path, "eval_training.csv"))
 
     # Delete model to save space
-    if os.path.exists(model_path):
+    if os.path.exists(model_path) and save_model==False:
         shutil.rmtree(model_path)
 
     return eval_sbert(df_test=df_test, df_ref=df_ref, id_column=id_column, answer_column=answer_column, target_column=target_column)

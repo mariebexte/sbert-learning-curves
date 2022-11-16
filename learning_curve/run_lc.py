@@ -37,7 +37,8 @@ def write_classification_statistics(filepath, y_true, y_pred, qwk):
 # num_labels: Steps in training sizes are n*num_labels until maximum possible sample size
 # num_samples: How many training subsets to sample per training size
 # upsample_training: Only takes effect when sampling_strategy is 'balanced' and num_labels > number of actually present labels; Creating as-balanced-as-possible training sets in steps of num_labels
-def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None, bert_base="bert-base-uncased", sbert_base="all-MiniLM-L6-v2"):
+# num_sbert_pairs_per_example: If None, build as many pairs as possible, otherwise limit to the specified amount, but if possible select different pairs across epochs
+def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None, bert_base="bert-base-uncased", sbert_base="all-MiniLM-L6-v2", num_sbert_pairs_per_example=None):
 
     target_path = os.path.join(results_folder, dataset_name, sampling_strategy, prompt_name, method)
     if not os.path.exists(target_path):
@@ -280,7 +281,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
 
                 elif method == "SBERT":
                     # Returns predictions obtained using max and avg (default) strategy
-                    y_pred_max, y_pred = train_sbert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test, base_model=sbert_base)
+                    y_pred_max, y_pred = train_sbert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test, base_model=sbert_base, num_pairs_per_example=num_sbert_pairs_per_example)
 
                 elif method in ["edit", "overlap", "cosine"]:
                     y_pred_max, y_pred = get_predictions(method=method, df_train=df_train_subset, df_val=df_val, df_test=df_test)
