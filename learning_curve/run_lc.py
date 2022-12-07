@@ -14,6 +14,8 @@ from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, 
 from learning_curve.plot_learning_curve import plot_learning_curve
 from learning_curve.train_sbert import train_sbert
 from learning_curve.train_bert import train_bert
+from learning_curve.train_npcr import train_npcr
+from learning_curve.train_npcr_orig import train_npcr_orig
 from learning_curve.baselines import get_predictions
 from learning_curve.pretrained_SBERT import get_predictions_pretrained
 from sentence_transformers import SentenceTransformer
@@ -298,6 +300,11 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
 
                     y_pred_max, y_pred = get_predictions_pretrained(df_train=df_train_subset, df_val=df_val, df_test=df_test, model=pretrained_model)
 
+                elif method == "NPCR":
+
+                    y_pred = train_npcr_orig(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test)
+                
+                
                 else:
                     logging.error("Unknown prediction method: ", method, "! Please choose one of the following: 'LR', 'RF', 'SVM', 'BERT', 'SBERT'!")
                     print("Unknown prediction method: ", method, "! Please choose one of the following: 'LR', 'RF', 'SVM', 'BERT', 'SBERT'!")

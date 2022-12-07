@@ -7,9 +7,10 @@ import sys
 # Predefined colors for the different methods for ease of comparison across curves
 colors = {"BERT_old": "green", "BERT_new": "orange", "BERT_old_save2": "green", "BERT_new_save2": "blue", "SBERT_noval": "deepskyblue", "BERT_10e": "red", "BERT_oldConfig": "red", "SBERT_wrongVal": "lime", "SBERT_wrongVal_max": "deepskyblue", "SBERT_valFixed": "lime", "SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
           "SBERT_10e": "purple", "SBERT_larger": "purple", "SBERT_smaller": "blue", "BERT_150": "red", "BERT_4": "purple", "SBERT_150": "lime", "SBERT_4": "deepskyblue",
-          "edit": "darkgoldenrod", "edit_max": "green", "overlap": "turquoise", "overlap_max": "turquoise", "cosine": "orange", "cosine_max": "orange", "pretrained": "deepskyblue", "pretrained_max": "deepskyblue"}
+          "edit": "darkgoldenrod", "edit_max": "green", "overlap": "turquoise", "overlap_max": "turquoise", "cosine": "orange", "cosine_max": "orange", "pretrained": "deepskyblue", "pretrained_max": "deepskyblue",
+          "NPCR": "turquoise"}
 # Predefined line styles for the different sampling strategies          
-strategies = {"BERT": "-", "LR": '-', "SBERT": "-", "edit": "-", "SBERT_max": "-", "edit_max": "--", "overlap_max": "--", "cosine_max": "--", "pretrained_max": "--"}
+strategies = {"BERT": "-", "LR": '-', "SBERT": "-", "edit": "-", "SBERT_max": "-", "edit_max": "--", "overlap_max": "--", "cosine_max": "--", "pretrained_max": "--", "pretrained": "--", "NPCR": "-"}
 
 
 # Method to average a dataframe while respecting the requirements of the respective metric, i.e. Fisher transforming in case of QWK
@@ -43,7 +44,7 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
             # Might be a prompt without results or where a method is not done yet, therefore check for existance of file
             if os.path.exists(results_path):
 
-                if method in ["SBERT", "BERT", "LR"]:
+                if method in ["pretrained", "NPCR", "LR"]:
                 #if method in ["SBERT", "BERT", "LR", "edit"]:
 
                     # Get averaged results for the current method and prompt
@@ -85,18 +86,18 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
 
     # plt.title(dataset_name+": "+prompt_name+" ("+sampling_strategy+")", fontsize=12)
     plt.ylim([0, 1])
-    # plt.xlabel("# of training examples", fontsize=20)
-    plt.xlabel("Number of manually graded answers", fontsize=20)
-    # plt.ylabel(eval_measure, fontsize=20)
-    plt.ylabel("Grading quality of the model", fontsize=20)
+    plt.xlabel("# of training examples", fontsize=20)
+    # plt.xlabel("Number of manually graded answers", fontsize=20)
+    plt.ylabel(eval_measure, fontsize=20)
+    # plt.ylabel("Grading quality of the model", fontsize=20)
 
     # Plot learning curve
     plt.grid()
 
     plt.rcParams['savefig.dpi'] = 300
-    # plt.rc('legend', fontsize=4, handlelength=1)
-    # plt.legend(loc="lower right")
-    #plt.xscale('log')
+    plt.rc('legend', fontsize=4, handlelength=1)
+    plt.legend(loc="lower right")
+    # plt.xscale('log')
 
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=20)
@@ -325,7 +326,7 @@ def dataset_curve(dataset_path, eval_measure):
 # dataset_curve("BASELINE_RESULTS_SEP_DATASETS/Beetle/SRA_5way", "weighted_f1")
 # dataset_curve("BASELINE_RESULTS_SEP_DATASETS/Beetle/SRA_2way", "weighted_f1")
 
-dataset_curve("TOTAL_RESULTS_REDUCED/ASAP", "QWK")
+# dataset_curve("TOTAL_RESULTS_REDUCED/ASAP", "QWK")
 # dataset_curve("TOTAL_RESULTS_REDUCED/SEB/SRA_5way", "weighted_f1")
 # dataset_curve("TOTAL_RESULTS_REDUCED/SEB/SRA_2way", "weighted_f1")
 # dataset_curve("TOTAL_RESULTS_REDUCED/Beetle/SRA_5way", "weighted_f1")
@@ -333,3 +334,5 @@ dataset_curve("TOTAL_RESULTS_REDUCED/ASAP", "QWK")
 
 # dataset_curve("EXP_RESULTS/SRA_5way", "weighted_f1")
 # dataset_curve("EXP_RESULTS/SRA_2way", "weighted_f1")
+
+dataset_curve("FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP", "QWK")

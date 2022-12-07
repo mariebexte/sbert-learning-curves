@@ -5,9 +5,9 @@ import sys
 
 # Aggregate results for longer ASAP learning curves
 
-first_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/TOTAL_RESULTS_REDUCED/ASAP/random"
-second_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/results_longASAP/ASAP/random"
-target_loc = "RESULTS_FULL_ASAP_LONG/ASAP/random"
+first_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/random"
+second_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/FINAL_RESULTS/RESULTS_LONG_ASAP/ASAP/random"
+target_loc = "FINAL_RESULTS/RESULTS_FULL_ASAP_LONG/ASAP/random"
 
 
 def copy(first_half_path, second_half_path, prompt, method, result_filename):
