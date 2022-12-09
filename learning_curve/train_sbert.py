@@ -11,10 +11,14 @@ import shutil
 import logging
 
 
-def eval_sbert(df_test, df_ref, id_column, answer_column, target_column):
+def eval_sbert(run_path, df_test, df_ref, id_column, answer_column, target_column):
 
     max_predictions = []
     avg_predictions = []
+
+    # Later used to create dataframe with classification results
+    predictions = {}
+    predictions_index = 0
 
     # Cross every test embedding with every train embedding
     for idx, test_answer in df_test.iterrows():
@@ -34,8 +38,10 @@ def eval_sbert(df_test, df_ref, id_column, answer_column, target_column):
 
         # Determine prediction: MAX
         max_row = copy_eval.iloc[[copy_eval["cos_sim"].argmax()]]
-        # max_sim = max_row.iloc[0]["cos_sim"]
+        max_sim = max_row.iloc[0]["cos_sim"]
         max_pred = max_row.iloc[0]["score2"]
+        max_sim_id = max_row.iloc[0]["id1"]
+        max_sim_answer = max_row.iloc[0]["text1"]
 
         # Determine prediction: AVG
         label_avgs = {}
@@ -43,9 +49,18 @@ def eval_sbert(df_test, df_ref, id_column, answer_column, target_column):
             label_subset = copy_eval[copy_eval["score2"] == label]
             label_avgs[label] = label_subset["cos_sim"].mean()
         avg_pred = max(label_avgs, key=label_avgs.get)
+        avg_sim = max(label_avgs.values())
 
         max_predictions.append(max_pred)
         avg_predictions.append(avg_pred)
+
+        predictions[predictions_index] = {"id": test_answer[id_column], "pred_avg": avg_pred, "sim_score_avg": avg_sim,"pred_max": max_pred, "sim_score_max": max_sim, "most_similar_answer_id": max_sim_id, "most_similar_answer_text": max_sim_answer}
+        predictions_index += 1
+
+    copy_test = df_test.copy()
+    df_predictions = pd.DataFrame.from_dict(predictions, orient='index')
+    df_predictions = pd.merge(copy_test, df_predictions, left_on=id_column, right_on="id")
+    df_predictions.to_csv(os.path.join(run_path, "predictions_sim.csv"), index=None)
 
     return max_predictions, avg_predictions
 
@@ -143,4 +158,4 @@ def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", targe
     if os.path.exists(model_path) and save_model==False:
         shutil.rmtree(model_path)
 
-    return eval_sbert(df_test=df_test, df_ref=df_ref, id_column=id_column, answer_column=answer_column, target_column=target_column)
+    return eval_sbert(run_path=run_path, df_test=df_test, df_ref=df_ref, id_column=id_column, answer_column=answer_column, target_column=target_column)

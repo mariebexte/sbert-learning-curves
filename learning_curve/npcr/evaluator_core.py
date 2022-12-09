@@ -3,8 +3,8 @@
 # @Date:   2017-02-10 14:56:57
 # @Last Modified by:   feidong1991
 # @Last Modified time: 2017-02-14 14:10:46
-from npcr.utils import rescale_tointscore, get_logger
-from npcr.metrics import *
+from learning_curve.npcr.utils import rescale_tointscore, get_logger
+from learning_curve.npcr.metrics import *
 import numpy as np
 import torch.utils.data as Data
 import torch

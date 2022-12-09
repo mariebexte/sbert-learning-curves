@@ -11,6 +11,41 @@ colors = {"BERT_old": "green", "BERT_new": "orange", "BERT_old_save2": "green", 
 # Predefined line styles for the different sampling strategies          
 strategies = {"balanced": "-", "random": '--', "avg": "-", "max": "--"}
 
+result_folder = "unique_lists"
+
+methods_to_consider = ["pretrained", "edit", 'LR']
+# methods_to_consider = ["RF", "pretrained", "edit"]
+# methods_to_consider = ["BERT", "edit", "pretrained"]
+# methods_to_consider = ["edit", "pretrained", 'cosine', 'overlap']
+# methods_to_consider = ["LR", "BERT", 'SBERT', 'SVM', "RF"]
+
+
+# Method to determine whether none of the methods gets an answer right
+def check_if_no_method_gets_it(row):
+
+    noone_gets_it = True
+    for method in methods_to_consider:
+        if row[method] == True:
+            noone_gets_it = False
+    return noone_gets_it
+
+
+# Method to determine whether just one of the methods gets an answer right
+def check_which_methods_get_it(row):
+
+    num_methods_who_get_it = 0
+    method_that_got_it = ""
+    for method in methods_to_consider:
+        if row[method] == True:
+            num_methods_who_get_it += 1
+            method_that_got_it = method
+    if num_methods_who_get_it == 0:
+        return "-none-"
+    elif num_methods_who_get_it > 1:
+        return "-multiple-"
+    else:
+        return method_that_got_it
+
 
 # Method to average a dataframe while respecting the requirements of the respective metric, i.e. Fisher transforming in case of QWK
 def get_average(df, eval_metric):
@@ -30,15 +65,12 @@ def get_average(df, eval_metric):
 
 
 # Path to results for a certain prompts (expected to contain subdirs with results of the different methods)
-def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
+# Result_path: Base path of the current result folder (grab from input)
+# Dataset_path: Base path of the data the results are based on (user input) / Needed to look up testing data
+def prompt_curve(results_path, dataset_path, sampling_strategy, prompt_name, dataset_name, eval_measure, id_column="id"):
 
-    # methods_to_consider = ["RF", "pretrained", "edit"]
-    # methods_to_consider = ["BERT", "edit", "pretrained"]
-    # methods_to_consider = ["edit", "pretrained", 'LR', 'BERT']
-    # methods_to_consider = ["edit", "pretrained", 'cosine', 'overlap']
-    methods_to_consider = ["LR", "BERT", 'SBERT', 'SVM', "RF"]
+    prompt_dir = os.path.join(results_path, sampling_strategy, prompt_name)
 
-    prompt_name = os.path.basename(prompt_dir)
     # Dataframe to collect average results of the different methods
     prompt_results = pd.DataFrame()
 
@@ -51,11 +83,11 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
         if os.path.isdir(os.path.join(prompt_dir, method)) and method in methods_to_consider:
             
             if method in ["pretrained", "edit", "cosine", "overlap"]:
-                results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results_max.csv")
+                method_results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results_max.csv")
             else:
-                results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results.csv")
+                method_results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results.csv")
             if os.path.exists(results_path):
-                df_results = pd.read_csv(results_path)
+                df_results = pd.read_csv(method_results_path)
 
                 # For each training size
                 for training_size in df_results.columns:
@@ -63,44 +95,54 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
                     for sample_run in os.listdir(os.path.join(prompt_dir, method, "train_size_"+str(training_size))):
                         if os.path.isdir(os.path.join(prompt_dir, method, 'train_size_'+str(training_size), sample_run)):
                             sample_counter += 1
-
-                            df_pred = pd.read_csv(os.path.join(os.path.join(prompt_dir, method, 'train_size_'+str(training_size), sample_run, 'predictions.csv')))
-                            set_correct = set(df_pred[df_pred['y_true'] == df_pred['y_pred']]['id'])
+                            sim_pred_path = os.path.join(os.path.join(prompt_dir, method, 'train_size_'+str(training_size), sample_run, 'predictions_sim.csv'))
+                            col_name_gold="y_true"
+                            col_name_pred="y_pred"
+                            if os.path.exists(sim_pred_path):
+                                df_pred = pd.read_csv(sim_pred_path)
+                                col_name_gold="label"
+                                col_name_pred="pred_max"
+                            else:
+                                df_pred = pd.read_csv(os.path.join(os.path.join(prompt_dir, method, 'train_size_'+str(training_size), sample_run, 'predictions.csv')))
+                            set_correct = set(df_pred[df_pred[col_name_gold] == df_pred[col_name_pred]][id_column])
                             training_size_dict = correct_ids_dict.get(training_size, {})
                             run_dict = training_size_dict.get(sample_run, {})
-                            run_dict[method] = set_correct
+                            run_dict[method] = (set_correct, df_pred)
 
                             training_size_dict[sample_run] = run_dict
                             correct_ids_dict[training_size] = training_size_dict
 
 
     #baseline_path = os.path.join("BASELINE_RESULTS_SEP_DATASETS/Beetle", dataset_name, sampling_strategy, str(prompt_name))
-    baseline_path = os.path.join("BASELINE_RESULTS_SEP_DATASETS/", dataset_name, sampling_strategy, str(prompt_name))
-    for method in os.listdir(baseline_path):
-        if os.path.isdir(os.path.join(baseline_path, method)) and method in methods_to_consider:
+    # baseline_path = os.path.join("FINAL_RESULTS/BASELINE_RESULTS_SEP_DATASETS/", dataset_name, sampling_strategy, str(prompt_name))
+    # for method in os.listdir(baseline_path):
+    #     if os.path.isdir(os.path.join(baseline_path, method)) and method in methods_to_consider:
             
-            if method in ["pretrained", "edit", "cosine", "overlap"]:
-                results_path = os.path.join(baseline_path, method, eval_measure+"_lc_results_max.csv")
-            else:
-                results_path = os.path.join(baseline_path, method, eval_measure+"_lc_results.csv")
-            if os.path.exists(results_path):
-                df_results = pd.read_csv(results_path)
+    #         if method in ["pretrained", "edit", "cosine", "overlap"]:
+    #             method_results_path = os.path.join(baseline_path, method, eval_measure+"_lc_results_max.csv")
+    #         else:
+    #             method_results_path = os.path.join(baseline_path, method, eval_measure+"_lc_results.csv")
+    #         if os.path.exists(results_path):
+    #             df_results = pd.read_csv(method_results_path)
 
-                # For each training size
-                for training_size in df_results.columns:
-                    sample_counter = 0
-                    for sample_run in os.listdir(os.path.join(baseline_path, method, "train_size_"+str(training_size))):
-                        if os.path.isdir(os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run)):
-                            sample_counter += 1
+    #             # For each training size
+    #             for training_size in df_results.columns:
+    #                 sample_counter = 0
+    #                 for sample_run in os.listdir(os.path.join(baseline_path, method, "train_size_"+str(training_size))):
+    #                     if os.path.isdir(os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run)):
+    #                         sample_counter += 1
+    #                         sim_pred_path = os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run, 'predictions_sim.csv')
+    #                         if os.path.exists(sim_pred_path):
+    #                             df_pred = pd.read_csv(sim_pred_path)
+    #                         else:
+    #                             df_pred = pd.read_csv(os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run, 'predictions.csv'))
+    #                         set_correct = set(df_pred[df_pred['y_true'] == df_pred['y_pred']]['id'])
+    #                         training_size_dict = correct_ids_dict.get(training_size, {})
+    #                         run_dict = training_size_dict.get(sample_run, {})
+    #                         run_dict[method] = (set_correct, df_pred)
 
-                            df_pred = pd.read_csv(os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run, 'predictions.csv'))
-                            set_correct = set(df_pred[df_pred['y_true'] == df_pred['y_pred']]['id'])
-                            training_size_dict = correct_ids_dict.get(training_size, {})
-                            run_dict = training_size_dict.get(sample_run, {})
-                            run_dict[method] = set_correct
-
-                            training_size_dict[sample_run] = run_dict
-                            correct_ids_dict[training_size] = training_size_dict
+    #                         training_size_dict[sample_run] = run_dict
+    #                         correct_ids_dict[training_size] = training_size_dict
 
             # if method == 'SBERT':
             #     results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results_max.csv")
@@ -127,6 +169,14 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
     # Dataframe to collect final data: Columns = Training sizes, Rows = Methods, Cells = Average number (over the n=20 runs) of test instances only this method classifies correctly
     df_unique_to_methods = None
 
+    # Points from method names to a list [F, T] where F (T) is the average similarity of incorrect (correct) classifications 
+    average_similarities = {}
+    num_measures = 0
+
+    # Points from method names to dict containing frequency counts of labels
+    label_dist_of_uniques = {}
+    label_dist_of_correct = {}
+
     # Each training size becomes one column in final dataframe
     for training_size in correct_ids_dict:
 
@@ -135,6 +185,15 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
         # Need to average the determined counts over however many sample runs there are
         for sample_run in correct_ids_dict[training_size]:
 
+            num_measures += 1
+
+            folder_path = os.path.join(results_path, result_folder, dataset_name, sampling_strategy, prompt_name, training_size, sample_run)
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+
+            df_test_orig = pd.read_csv(os.path.join(dataset_path, prompt_name, "test.csv"))
+            # df_test_orig = pd.read_csv(os.path.join(dataset_path, prompt_name, "test_unseen_answers.csv"))
+
             # for method in ["LR", "RF", "SVM", "BERT", "SBERT"]:
             #for method in ["pretrained", "edit", "cosine", "overlap"]:
             # for method in ["LR", "RF", "SVM", "BERT", "SBERT", "pretrained", "edit", "cosine", "overlap"]:
@@ -142,20 +201,70 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
             #for method in correct_ids_dict[training_size][sample_run]:
                 #print(method)
 
-                method_set = correct_ids_dict[training_size][sample_run][method]
+                method_set = correct_ids_dict[training_size][sample_run][method][0]
+                method_df = correct_ids_dict[training_size][sample_run][method][1]
 
                 other_methods = list(correct_ids_dict[training_size][sample_run].keys())
                 other_methods.remove(method)
 
                 other_ids = set()
                 for other_method in other_methods:
-                    other_ids.update(correct_ids_dict[training_size][sample_run][other_method])
+                    other_ids.update(correct_ids_dict[training_size][sample_run][other_method][0])
 
+                # Set with all answer ids only this method gets correctly
                 diff = method_set.difference(other_ids)
 
                 method_count = method_counts.get(method, 0)
                 method_count += len(diff)
                 method_counts[method] = method_count
+
+                # In folder structure: Place df with answer df
+                method_df_unique = method_df[method_df[id_column].isin(diff)]
+                method_df_unique.to_csv(os.path.join(folder_path, '-'.join(methods_to_consider)+"_uniqueTo_"+method+".csv"), index=None)
+
+                df_test_orig[method] = df_test_orig[id_column].isin(method_set)
+
+                # If it is a similarity-based method: Calculate average similarity of incorrect/correct classifications
+                if method in ["edit", "pretrained", "overlap"]:
+                    avg_sim = average_similarities.get(method, [0, 0])
+                    correct = method_df[method_df["label"]==method_df["pred_max"]]
+                    incorrect = method_df.drop(correct.index)
+                    avg_sim[0] = avg_sim[0] + incorrect["sim_score_max"].mean()
+                    avg_sim[1] = avg_sim[1] + correct["sim_score_max"].mean()
+                    average_similarities[method] = avg_sim
+
+                freq_dist = label_dist_of_uniques.get(method, {})
+                if freq_dist == {}:
+                    freq_dist["method"] = method
+                try:
+                    value_counts = method_df_unique["label"].value_counts()
+                except:
+                    value_counts = method_df_unique["y_true"].value_counts()
+                for key in value_counts.keys():
+                    before = freq_dist.get(key, 0)
+                    freq_dist[key] = before + value_counts[key]
+                label_dist_of_uniques[method] = freq_dist
+
+
+                freq_dist = label_dist_of_correct.get(method, {})
+                try:
+                    correct = method_df[method_df["label"]==method_df["pred_max"]]
+                except:
+                    correct = method_df[method_df["y_true"]==method_df["y_pred"]]
+                if freq_dist == {}:
+                    freq_dist["method"] = method
+                try:
+                    value_counts = correct["label"].value_counts()
+                except:
+                    value_counts = correct["y_true"].value_counts()
+                for key in value_counts.keys():
+                    before = freq_dist.get(key, 0)
+                    freq_dist[key] = before + value_counts[key]
+                label_dist_of_correct[method] = freq_dist
+
+
+            df_test_orig["correct_by"] = df_test_orig.apply(check_which_methods_get_it, axis=1)
+            df_test_orig.to_csv(os.path.join(folder_path, "-".join(methods_to_consider)+".csv"), index=None)   
             
             
         # Average method_counts over the number of runs
@@ -169,8 +278,18 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
             df_unique_to_methods = df_train_size
         else:
             df_unique_to_methods = pd.merge(df_unique_to_methods, df_train_size)
-       
-    
+
+    with open(os.path.join(results_path, result_folder, "-".join(methods_to_consider)+"_average_simiarities.csv"), 'w') as avg_sims:
+        avg_sims.write("Method\tAvg_Incorrect\tAvg_Correct\n")
+        for key in average_similarities.keys():
+            avg_sims.write(key+"\t"+str(average_similarities[key][0]/num_measures)+"\t"+str(average_similarities[key][1]/num_measures)+"\n")
+
+    label_dist = pd.DataFrame.from_dict(label_dist_of_uniques, orient="index")
+    label_dist.to_csv(os.path.join(results_path, result_folder, "-".join(methods_to_consider)+"_label_dist.csv"), index=None)
+
+    label_dist_corr = pd.DataFrame.from_dict(label_dist_of_correct, orient="index")
+    label_dist_corr.to_csv(os.path.join(results_path, result_folder, "-".join(methods_to_consider)+"_label_dist_corr.csv"), index=None)
+
     if df_unique_to_methods is not None:
         df_unique_to_methods = df_unique_to_methods.set_index('method')
         for method, row in df_unique_to_methods.iterrows():
@@ -212,7 +331,9 @@ def prompt_curve(prompt_dir, dataset_name, sampling_strategy, eval_measure):
 
 
 # Path to results obtained with a certain sampling strategy (expected to contain folders with results to different promots)
-def strategy_curve(strategy_path, dataset_name, eval_measure):
+def strategy_curve(results_path, dataset_folder, strategy, dataset_name, eval_measure):
+
+    strategy_path = os.path.join(results_path, strategy)
 
     sampling_strategy = os.path.basename(strategy_path)
 
@@ -223,7 +344,7 @@ def strategy_curve(strategy_path, dataset_name, eval_measure):
     for prompt in os.listdir(strategy_path):
         if os.path.isdir(os.path.join(strategy_path, prompt)):
 
-            prompt_results = prompt_curve(os.path.join(strategy_path, prompt), dataset_name, sampling_strategy, eval_measure)
+            prompt_results = prompt_curve(results_path=results_path, dataset_path=dataset_folder, sampling_strategy=strategy, prompt_name=prompt, dataset_name=dataset_name, eval_measure=eval_measure)
 
             # Can be a prompt where no calculation of LC was possible, i.e. balanced sampling of a prompt where not all labels are present
             if prompt_results is not None and len(prompt_results) > 0:
@@ -310,17 +431,17 @@ def strategy_curve(strategy_path, dataset_name, eval_measure):
 
 
 # Path to the results of an entire dataset (expected to contain subdirs with sampling strategy results)
-def dataset_curve(dataset_path, eval_measure):
+def dataset_curve(results_folder, dataset_path, eval_measure):
 
-    dataset_name = os.path.basename(dataset_path)
+    dataset_name = os.path.basename(results_folder)
     # Dataframe to collect overall averaged results per method and sampling strategy
     overall_results = pd.DataFrame()
 
     # For each sampling strategy: Get averaged results
-    for sampling_strategy in os.listdir(dataset_path):
-        if os.path.isdir(os.path.join(dataset_path, sampling_strategy)):
+    for sampling_strategy in os.listdir(results_folder):
+        if os.path.isdir(os.path.join(results_folder, sampling_strategy)) and not sampling_strategy==result_folder:
 
-            strategy_results = strategy_curve(os.path.join(dataset_path, sampling_strategy), dataset_name, eval_measure)
+            strategy_results = strategy_curve(results_path=results_folder, dataset_folder=dataset_path, strategy=sampling_strategy, dataset_name=dataset_name, eval_measure=eval_measure)
 
             if len(strategy_results) > 0:
 
@@ -334,7 +455,7 @@ def dataset_curve(dataset_path, eval_measure):
 
 
     # Save result overview dataframe to csv
-    overall_results.to_csv(os.path.join(dataset_path, dataset_name+"_numUnique_strategy_comparison.csv"), index=None)
+    overall_results.to_csv(os.path.join(results_folder, dataset_name+"_numUnique_strategy_comparison.csv"), index=None)
 
     # Reduce columns to just the training sizes for easier plotting
     train_sizes = overall_results.columns.tolist()
@@ -368,7 +489,7 @@ def dataset_curve(dataset_path, eval_measure):
 
     plt.tight_layout()
 
-    plt.savefig(os.path.join(dataset_path, dataset_name+"_numUnique_strategy_comparison.png"))
+    plt.savefig(os.path.join(results_folder, dataset_name+"_numUnique_strategy_comparison.png"))
 
     plt.clf()
     plt.cla()
@@ -410,7 +531,7 @@ def dataset_curve(dataset_path, eval_measure):
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-5way", "weighted_f1")
 # dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-2way", "weighted_f1")
 
-dataset_curve("EXP_RESULTS_SEP_DATASETS/ASAP", "QWK")
+dataset_curve(results_folder="FINAL_RESULTS/EXP_RESULTS_SEP_DATASETS/ASAP", dataset_path="data/ASAP", eval_measure="QWK")
 # dataset_curve("EXP_RESULTS_SEP_DATASETS/Beetle/SRA_2way", "weighted_f1")
 # dataset_curve("EXP_RESULTS_SEP_DATASETS/Beetle/SRA_5way", "weighted_f1")
 # Does not exist for BERT

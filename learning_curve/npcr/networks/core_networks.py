@@ -11,7 +11,8 @@ from transformers import BertModel
 # should keep pace with file in ./../reader.py
 file = 'bert-base-uncased'
 bert_model = BertModel.from_pretrained(file)
-bert_model.cuda()
+if torch.cuda.is_available():
+    bert_model.cuda()
 
 
 class mlp(nn.Module):

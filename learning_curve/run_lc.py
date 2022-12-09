@@ -286,7 +286,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
                     y_pred_max, y_pred = train_sbert(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test, base_model=sbert_base, num_pairs_per_example=num_sbert_pairs_per_example)
 
                 elif method in ["edit", "overlap", "cosine"]:
-                    y_pred_max, y_pred = get_predictions(method=method, df_train=df_train_subset, df_val=df_val, df_test=df_test)
+                    y_pred_max, y_pred = get_predictions(run_path=run_path, method=method, df_train=df_train_subset, df_val=df_val, df_test=df_test)
 
                 elif method == "pretrained":
 
@@ -298,7 +298,7 @@ def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval
                             device = "cuda"
                         pretrained_model = SentenceTransformer(sbert_base, device=device)
 
-                    y_pred_max, y_pred = get_predictions_pretrained(df_train=df_train_subset, df_val=df_val, df_test=df_test, model=pretrained_model)
+                    y_pred_max, y_pred = get_predictions_pretrained(run_path=run_path, df_train=df_train_subset, df_val=df_val, df_test=df_test, model=pretrained_model)
 
                 elif method == "NPCR":
 

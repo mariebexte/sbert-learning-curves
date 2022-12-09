@@ -6,9 +6,9 @@ import torch.nn as nn
 import torch.utils.data as Data
 import time
 
-from npcr import data_prepare
-from npcr.evaluator_core import Evaluator_opti
-from npcr.networks.core_networks import npcr_model
+from learning_curve.npcr import data_prepare
+from learning_curve.npcr.evaluator_core import Evaluator_opti
+from learning_curve.npcr.networks.core_networks import npcr_model
 
 
 # TODO: Drop base model?

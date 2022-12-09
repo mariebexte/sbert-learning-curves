@@ -9,7 +9,7 @@ import nltk
 import re
 import numpy as np
 import pickle as pk
-from npcr import utils
+from learning_curve.npcr import utils
 import torch
 import os
 from transformers import BertModel,BertTokenizer
