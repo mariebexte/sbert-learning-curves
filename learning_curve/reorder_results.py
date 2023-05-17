@@ -20,8 +20,5 @@ def reorder(dir_to_reorder, target_location):
                     copy_tree(source_path, target_path)
 
 
-# reorder("EXP_RESULTS/SRA_5way", "EXP_RESULTS_SEP_DATASETS")
-# reorder("EXP_RESULTS/SRA_2way", "EXP_RESULTS_SEP_DATASETS")
-
-# reorder("BASELINE_RESULTS/SRA_2way", "BASELINE_RESULTS_SEP_DATASETS")
-# reorder("BASELINE_RESULTS/SRA_5way", "BASELINE_RESULTS_SEP_DATASETS")
+reorder("results/SRA_5way", "results/RESULTS_SEP_DATASETS")
+reorder("results/SRA_2way", "results/RESULTS_SEP_DATASETS")

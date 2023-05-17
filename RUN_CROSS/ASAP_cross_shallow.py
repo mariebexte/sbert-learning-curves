@@ -27,8 +27,7 @@ for base_prompt in range(1, 11):
 
         for target_prompt in target_prompts:
 
-            #for shallow_method in ['LR', 'SVM', 'RF']:
-            for shallow_method in ['LR']:
+            for shallow_method in ['LR', 'SVM', 'RF']:
 
                 print(base_prompt, target_prompt)
 

@@ -6,3 +6,4 @@ adapt
 Levenshtein
 regex
 scikit-learn
+sentence-transformers

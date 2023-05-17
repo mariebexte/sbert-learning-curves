@@ -10,7 +10,7 @@ import torch
 
 from regex import F
 from learning_curve.train_shallow_cross import train_shallow_cross
-from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report, f1_score
+from sklearn.metrics import cohen_kappa_score, classification_report, f1_score
 from learning_curve.plot_learning_curve import plot_learning_curve
 from learning_curve.train_sbert import train_sbert
 from learning_curve.train_bert import train_bert

@@ -66,7 +66,7 @@ def eval_sbert(run_path, df_test, df_ref, id_column, answer_column, target_colum
 
 
 # For larger amounts of training data: Do not create all possible pairs, but limit to a fixed number per epoch (if possible, have different pairs across different epochs)
-def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", target_column="label", id_column="id", base_model="all-MiniLM-L6-v2", num_epochs=5, batch_size=8, do_warmup=False, num_pairs_per_example=None, save_model=False):
+def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", target_column="label", id_column="id", base_model="all-MiniLM-L6-v2", num_pairs_per_example=None, save_model=False):
 
     if num_pairs_per_example is not None:
         num_samples = len(df_train) * num_pairs_per_example
@@ -100,7 +100,7 @@ def train_sbert(run_path, df_train, df_test, df_val, answer_column="text", targe
     val_example_dict = {}
     val_example_index = 0
     for _, example_1 in df_val.iterrows():
-        for _, example_2 in df_val.iterrows():
+        for _, example_2 in df_train.iterrows():
 
             if not example_1[id_column] == example_2[id_column]:
 

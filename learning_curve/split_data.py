@@ -1,9 +1,7 @@
-from ast import Pass
 from operator import sub
 from random import random
 import pandas as pd
 import os
-import sys
 import xml.etree.ElementTree as ET
 
 
@@ -11,6 +9,12 @@ import xml.etree.ElementTree as ET
 data_folder = "data"
 # Desired order of columns in final files
 data_columns = ["prompt", "id", "text", "label"]
+
+asap_train_path = "data/orig/ASAP/train.tsv"
+asap_test_path = "data/orig/ASAP/test_public.tsv"
+
+beetle_path = "data/orig/SRA/beetle"
+seb_path = "data/orig/SRA/sciEntsBank"
 
 # Random state to split data
 state=4334
@@ -23,7 +27,7 @@ def has_at_least_two_labels(df):
     return True
 
 
-def split_asap():
+def split_asap(asap_train_path, asap_test_path):
 
     val_size = 4
 
@@ -31,8 +35,6 @@ def split_asap():
     test_size_dict={}
 
     # Read gold data
-    asap_train_path = "/Users/mariebexte/Coding/Datasets/_content_scoring_datasets/en/ASAP/train.tsv"
-    asap_test_path = "/Users/mariebexte/Coding/Datasets/_content_scoring_datasets/en/ASAP/test_public.txt"
     df_train = pd.read_csv(asap_train_path, sep="\t")
     df_test = pd.read_csv(asap_test_path, sep="\t")
 
@@ -215,11 +217,9 @@ def write_SRA_train_val(two_way_path, five_way_path, subset, train_path, val_siz
     return num_answers_dict
 
 
-def split_semEval():
+def split_semEval(beetle_path, seb_path):
 
     val_size = 4
-    beetle_path = "/Users/mariebexte/Coding/Datasets/SemEval2013-Task7-5way/beetle"
-    seb_path = "/Users/mariebexte/Coding/Datasets/SemEval2013-Task7-5way/sciEntsBank"
 
     dataset_name = "SRA"
     dataset_path_5way = os.path.join(data_folder, dataset_name + "_5way")
@@ -267,7 +267,5 @@ def split_semEval():
     print("Test", seb_num_answers.test.mean())
 
     
-
-
-split_asap()
-split_semEval()
+split_asap(asap_train_path=asap_train_path, asap_test_path=asap_test_path)
+split_semEval(beetle_path=beetle_path, seb_path=seb_path)

@@ -77,6 +77,4 @@ def collect(dir_to_collect_from, target_location):
 
 
 
-# collect("BASELINE_RESULTS_SEP_DATASETS", "TOTAL_RESULTS_REDUCED")
-# collect("EXP_RESULTS_SEP_DATASETS", "TOTAL_RESULTS_REDUCED")
-collect("results", "FINAL_RESULTS/TOTAL_RESULTS_REDUCED")
+collect("results/RESULTS_SEP_DATASETS", "results/RESULTS_REDUCED")
