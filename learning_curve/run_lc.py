@@ -13,7 +13,7 @@ from learning_curve.train_shallow import train_shallow
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report, f1_score
 from learning_curve.plot_learning_curve import plot_learning_curve
 from learning_curve.train_sbert import train_sbert
-from learning_curve.train_bert import train_bert
+from learning_curve.train_bert_faster import train_bert
 from learning_curve.train_npcr import train_npcr
 from learning_curve.train_npcr_orig import train_npcr_orig
 from learning_curve.baselines import get_predictions
