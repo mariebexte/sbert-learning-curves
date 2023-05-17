@@ -8,7 +8,8 @@ from copy import deepcopy
 train_sizes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 base_path="data/SRA_5way"
 
-with open('SRA_Beetle.txt', 'r') as prompts:
+# with open('data/SRA_SEB.txt', 'r') as prompts:
+with open('data/SRA_Beetle.txt', 'r') as prompts:
 
     for prompt in prompts:
 

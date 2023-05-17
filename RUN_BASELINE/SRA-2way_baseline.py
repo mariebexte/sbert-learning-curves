@@ -12,7 +12,8 @@ for method in ["edit", "overlap", "cosine", "pretrained"]:
 
     for strategy in ["balanced", "random"]:
 
-        with open('SRA_Beetle.txt', 'r') as prompts:
+        # with open('data/SRA_SEB.txt', 'r') as prompts:
+        with open('data/SRA_Beetle.txt', 'r') as prompts:
 
             for prompt in prompts:
                 prompt=prompt.strip()

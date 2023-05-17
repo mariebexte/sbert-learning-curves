@@ -3,6 +3,7 @@ RESULTS_PRELIM_EXP
 _results*
 results*
 RESULTS*
+FINAL_RESULTS*
 data*
 _old_stuff
 __pycache__
@@ -15,3 +16,4 @@ TOTAL_RESULTS*
 ASAP_BASE_MODELS*
 BASELINE_RESULTS*
 CROSS_PLOTS
+AES-NPCR

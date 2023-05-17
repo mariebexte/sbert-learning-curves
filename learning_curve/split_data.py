@@ -27,6 +27,9 @@ def split_asap():
 
     val_size = 4
 
+    train_size_dict={}
+    test_size_dict={}
+
     # Read gold data
     asap_train_path = "/Users/mariebexte/Coding/Datasets/_content_scoring_datasets/en/ASAP/train.tsv"
     asap_test_path = "/Users/mariebexte/Coding/Datasets/_content_scoring_datasets/en/ASAP/test_public.txt"
@@ -61,6 +64,8 @@ def split_asap():
         df_prompt = df_test[df_test["prompt"] == prompt]
         df_prompt.to_csv(os.path.join(prompt_path, "test.csv"), index=None)
 
+        test_size_dict[prompt] = len(df_prompt)
+
 
     ## Write data: Train and val (Split away some of train to become val)
     # For each prompt
@@ -73,6 +78,7 @@ def split_asap():
 
         # Take val_size instances of train as val
         df_prompt = df_train[df_train["prompt"] == prompt]
+        train_size_dict[prompt] = len(df_prompt)
         df_val = df_prompt.sample(val_size, random_state=state)
 
         # If we end up with validation instances that all have the same label: Sample again
@@ -88,6 +94,14 @@ def split_asap():
         # Save val and remaining train as new training data
         df_val.to_csv(os.path.join(prompt_path, "val.csv"), index=None)
         df_rest.to_csv(os.path.join(prompt_path, "train.csv"), index=None)
+
+    train_sizes = pd.DataFrame.from_dict(train_size_dict, orient="index", columns=["train"])
+    test_sizes = pd.DataFrame.from_dict(test_size_dict, orient="index", columns=["test"])
+    prompt_sizes = pd.merge(left=train_sizes, right=test_sizes, left_index=True, right_index=True)
+    print("ASAP avg num answers")
+    print(prompt_sizes)
+    print("Train", prompt_sizes.train.mean())
+    print("Test", prompt_sizes.test.mean())
 
 
 # For SRA processing: Collect all XML files in dir into dictionary of dataframes
@@ -116,6 +130,8 @@ def get_df_dict(path):
 
 def write_SRA_testing(two_way_path, five_way_path, subset, test_path):
 
+    num_answers_dict = {}
+
     # Beetle or SEB subfolders
     two_way_path_subset = os.path.join(two_way_path, subset)
     five_way_path_subset = os.path.join(five_way_path, subset)
@@ -135,6 +151,7 @@ def write_SRA_testing(two_way_path, five_way_path, subset, test_path):
                 os.makedirs(path)
 
         df_answers = answers_dict[prompt]
+        num_answers_dict[prompt] = len(df_answers)
 
         # Save prompt with 5-way annotations
         df_answers.to_csv(os.path.join(prompt_path_5way, os.path.basename(test_path) + ".csv"), index = None) 
@@ -142,6 +159,8 @@ def write_SRA_testing(two_way_path, five_way_path, subset, test_path):
         # Save prompt with 2-way annotations
         df_answers["label"][df_answers["label"] != "correct"] = "incorrect"
         df_answers.to_csv(os.path.join(prompt_path_2way, os.path.basename(test_path) + ".csv"), index = None)
+
+    return num_answers_dict
 
 
 def write_SRA_train_val(two_way_path, five_way_path, subset, train_path, val_size):
@@ -152,6 +171,8 @@ def write_SRA_train_val(two_way_path, five_way_path, subset, train_path, val_siz
 
     # Collect answers to all prompts into dataframes
     df_dict_train = get_df_dict(train_path)
+
+    num_answers_dict = {}
 
     # For each prompt
     for prompt in df_dict_train.keys():
@@ -164,6 +185,7 @@ def write_SRA_train_val(two_way_path, five_way_path, subset, train_path, val_siz
                 os.makedirs(path)
 
         df_prompt = df_dict_train[prompt]
+        num_answers_dict[prompt] = len(df_prompt)
 
         # Sample val_size instances of the data for validation, rest becomes train
         df_val = df_prompt.sample(val_size, random_state=state)
@@ -190,6 +212,8 @@ def write_SRA_train_val(two_way_path, five_way_path, subset, train_path, val_siz
         df_train.to_csv(os.path.join(prompt_path_2way, "train.csv"), index = None)
         df_val.to_csv(os.path.join(prompt_path_2way, "val.csv"), index = None)
 
+    return num_answers_dict
+
 
 def split_semEval():
 
@@ -210,18 +234,39 @@ def split_semEval():
     ## Process Beetle
     beetle_name = "Beetle"
     # Testing data
-    for path in ["test-unseen-answers", "test-unseen-questions"]:
-        write_SRA_testing(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=beetle_name, test_path=os.path.join(beetle_path, path))
+    # for path in ["test-unseen-answers", "test-unseen-questions"]:
+    for path in ["test-unseen-answers"]:
+        beetle_num_answers_test = write_SRA_testing(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=beetle_name, test_path=os.path.join(beetle_path, path))
     # Training and validation data
-    write_SRA_train_val(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=beetle_name, train_path=os.path.join(beetle_path, "train", "Core"), val_size=val_size)
+    beetle_num_answers_train = write_SRA_train_val(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=beetle_name, train_path=os.path.join(beetle_path, "train", "Core"), val_size=val_size)
 
     ## Process SEB
     seb_name = "SEB"
     # Testing data
-    for path in ["test-unseen-answers", "test-unseen-questions", "test-unseen-domains"]:
-        write_SRA_testing(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=seb_name, test_path=os.path.join(seb_path, path))
+    # for path in ["test-unseen-answers", "test-unseen-questions", "test-unseen-domains"]:
+    for path in ["test-unseen-answers"]:
+        seb_num_answers_test = write_SRA_testing(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=seb_name, test_path=os.path.join(seb_path, path))
     # Training and validation data
-    write_SRA_train_val(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=seb_name, train_path=os.path.join(seb_path, "train", "Core"), val_size=val_size)
+    seb_num_answers_train = write_SRA_train_val(two_way_path=dataset_path_2way, five_way_path=dataset_path_5way, subset=seb_name, train_path=os.path.join(seb_path, "train", "Core"), val_size=val_size)
+
+    beetle_num_answers_test = pd.DataFrame.from_dict(beetle_num_answers_test, orient='index', columns=['test'])
+    beetle_num_answers_train = pd.DataFrame.from_dict(beetle_num_answers_train, orient='index', columns=['train'])
+    beetle_num_answers = pd.merge(left=beetle_num_answers_train, right=beetle_num_answers_test, right_index=True, left_index=True)
+    print("Beetle avg num answers")
+    # print(beetle_num_answers)
+    print("Train", beetle_num_answers.train.mean())
+    print("Test", beetle_num_answers.test.mean())
+    print()
+
+    seb_num_answers_train = pd.DataFrame.from_dict(seb_num_answers_train, orient='index', columns=['train'])
+    seb_num_answers_test = pd.DataFrame.from_dict(seb_num_answers_test, orient='index', columns=['test'])
+    seb_num_answers = pd.merge(left=seb_num_answers_train, right=seb_num_answers_test, left_index=True, right_index=True)
+    print("SEB avg num answers")
+    # print(seb_num_answers)
+    print("Train", seb_num_answers.train.mean())
+    print("Test", seb_num_answers.test.mean())
+
+    
 
 
 split_asap()
