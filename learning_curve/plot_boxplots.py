@@ -109,7 +109,8 @@ def plot_boxes(sd_lists, labels, target_file, title, methods):
 methods = ["BERT", "SBERT_max"]
 
 ### ASAP balanced
-base_path = "FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/balanced/ASAP_balanced_"
+# base_path = "FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/balanced/ASAP_balanced_"
+base_path = "results/RESULTS_REDUCED/ASAP/balanced/ASAP_balanced_"
 overall_dict = {}
 
 for method in methods:
@@ -133,7 +134,8 @@ plot_boxes(overall_dict, list(method_dict.keys()), os.path.join(analysis_folder,
 
 
 ### ASAP random
-base_path = "FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/random/ASAP_random_"
+# base_path = "FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/random/ASAP_random_"
+base_path = "results/RESULTS_REDUCED/ASAP/random/ASAP_random_"
 overall_dict = {}
 
 for method in methods:

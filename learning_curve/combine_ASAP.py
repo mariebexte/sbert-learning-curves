@@ -1,14 +1,10 @@
 from shutil import copyfile, copy
 import pandas as pd
 import os
-import sys
 
 # Aggregate results for longer ASAP learning curves
-
-first_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/random"
-second_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/FINAL_RESULTS/RESULTS_LONG_ASAP/ASAP/random"
-target_loc = "FINAL_RESULTS/RESULTS_FULL_ASAP_LONG/ASAP/random"
-
+# target_loc = "FINAL_RESULTS/RESULTS_FULL_ASAP_LONG/ASAP/random"
+target_loc = "results/FULL_ASAP_LONG/ASAP/random"
 
 def copy(first_half_path, second_half_path, prompt, method, result_filename):
 
@@ -37,14 +33,26 @@ def copy(first_half_path, second_half_path, prompt, method, result_filename):
     full_results.to_csv(os.path.join(target_path, result_filename), index=None)
 
 
-for prompt in range(1, 11):
+def combine_methods(first_half_path, second_half_path, methods):
 
-    for method in ["SBERT", "BERT", "LR", "RF", "SVM"]:
+    for prompt in range(1, 11):
 
-        copy(first_half_path=first_half_path, second_half_path=second_half_path, method=method, prompt=prompt, result_filename='QWK_lc_results.csv')
+        for method in methods:
 
-        if method == "SBERT":
-            copy(first_half_path=first_half_path, second_half_path=second_half_path, method=method, prompt=prompt, result_filename='QWK_lc_results_max.csv')
+            copy(first_half_path=first_half_path, second_half_path=second_half_path, method=method, prompt=prompt, result_filename='QWK_lc_results.csv')
+
+            if method in ["SBERT", "pretrained", "edit"]:
+                copy(first_half_path=first_half_path, second_half_path=second_half_path, method=method, prompt=prompt, result_filename='QWK_lc_results_max.csv')
 
 
+# first_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/random"
+# second_half_path = "/Users/mariebexte/Coding/Projects/sbert-learning-curves/FINAL_RESULTS/RESULTS_LONG_ASAP/ASAP/random"
+# combine_methods(first_half_path=first_half_path, second_half_path=second_half_path, methods=["LR", "BERT", "SBERT", "RF", "SVM"])
 
+# first_half_path = "FINAL_RESULTS/TOTAL_RESULTS_REDUCED/ASAP/random"
+# second_half_path = "FINAL_RESULTS/RESULTS_LONG_ASAP_BASELINES/ASAP/random"
+# combine_methods(first_half_path=first_half_path, second_half_path=second_half_path, methods=["edit", "pretrained"])
+
+first_half_path = "results/RESULTS_REDUCED/ASAP/random"
+second_half_path = "results_long/RESULTS_REDUCED/ASAP/random"
+combine_methods(first_half_path=first_half_path, second_half_path=second_half_path, methods=["LR", "BERT", "SBERT", "RF", "SVM", "edit", "pretrained"])

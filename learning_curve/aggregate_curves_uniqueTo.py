@@ -5,20 +5,15 @@ import numpy as np
 import sys
 
 # Predefined colors for the different methods for ease of comparison across curves
-colors = {"BERT_old": "green", "BERT_new": "orange", "BERT_old_save2": "green", "BERT_new_save2": "blue", "SBERT_noval": "deepskyblue", "BERT_10e": "red", "BERT_oldConfig": "red", "SBERT_wrongVal": "lime", "SBERT_wrongVal_max": "deepskyblue", "SBERT_valFixed": "lime", "SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
-          "SBERT_10e": "purple", "SBERT_larger": "purple", "SBERT_smaller": "blue", "BERT_150": "red", "BERT_4": "purple", "SBERT_150": "lime", "SBERT_4": "deepskyblue",
+colors = {"SBERT_max": "pink", "SBERT": "red", "LR": "blue", "RF": "green", "SVM": "orange", "BERT": "purple",
           "edit": "darkgoldenrod", "overlap": "black", "cosine": "lime", "pretrained": "deepskyblue"}
 # Predefined line styles for the different sampling strategies          
 strategies = {"balanced": "-", "random": '--', "avg": "-", "max": "--"}
 
 result_folder = "unique_lists"
 
-methods_to_consider = ["pretrained", "edit", 'LR']
-# methods_to_consider = ["RF", "pretrained", "edit"]
-# methods_to_consider = ["BERT", "edit", "pretrained"]
-# methods_to_consider = ["edit", "pretrained", 'cosine', 'overlap']
-# methods_to_consider = ["LR", "BERT", 'SBERT', 'SVM', "RF"]
-
+# EDIT THIS TO ADAPT PLOT
+methods_to_consider = ["pretrained", "edit", 'LR', 'SBERT', 'BERT']
 
 # Method to determine whether none of the methods gets an answer right
 def check_if_no_method_gets_it(row):
@@ -47,21 +42,9 @@ def check_which_methods_get_it(row):
         return method_that_got_it
 
 
-# Method to average a dataframe while respecting the requirements of the respective metric, i.e. Fisher transforming in case of QWK
 def get_average(df, eval_metric):
 
-    # if eval_metric.lower() == "qwk":
-
-    #     # Arctanh == FISHER
-    #     df_preds_fisher = np.arctanh(df)
-    #     test_scores_mean_fisher = np.nanmean(df_preds_fisher, axis=0)
-    #     # Tanh == FISHERINV
-    #     test_scores_mean = np.tanh(test_scores_mean_fisher)
-
-    # else:
-    test_scores_mean = np.nanmean(df, axis=0)
-
-    return test_scores_mean
+    return np.nanmean(df, axis=0)
 
 
 # Path to results for a certain prompts (expected to contain subdirs with results of the different methods)
@@ -82,7 +65,7 @@ def prompt_curve(results_path, dataset_path, sampling_strategy, prompt_name, dat
     for method in os.listdir(os.path.join(prompt_dir)):
         if os.path.isdir(os.path.join(prompt_dir, method)) and method in methods_to_consider:
             
-            if method in ["pretrained", "edit", "cosine", "overlap"]:
+            if method in ["SBERT", "pretrained", "edit", "cosine", "overlap"]:
                 method_results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results_max.csv")
             else:
                 method_results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results.csv")
@@ -113,59 +96,6 @@ def prompt_curve(results_path, dataset_path, sampling_strategy, prompt_name, dat
                             correct_ids_dict[training_size] = training_size_dict
 
 
-    #baseline_path = os.path.join("BASELINE_RESULTS_SEP_DATASETS/Beetle", dataset_name, sampling_strategy, str(prompt_name))
-    # baseline_path = os.path.join("FINAL_RESULTS/BASELINE_RESULTS_SEP_DATASETS/", dataset_name, sampling_strategy, str(prompt_name))
-    # for method in os.listdir(baseline_path):
-    #     if os.path.isdir(os.path.join(baseline_path, method)) and method in methods_to_consider:
-            
-    #         if method in ["pretrained", "edit", "cosine", "overlap"]:
-    #             method_results_path = os.path.join(baseline_path, method, eval_measure+"_lc_results_max.csv")
-    #         else:
-    #             method_results_path = os.path.join(baseline_path, method, eval_measure+"_lc_results.csv")
-    #         if os.path.exists(results_path):
-    #             df_results = pd.read_csv(method_results_path)
-
-    #             # For each training size
-    #             for training_size in df_results.columns:
-    #                 sample_counter = 0
-    #                 for sample_run in os.listdir(os.path.join(baseline_path, method, "train_size_"+str(training_size))):
-    #                     if os.path.isdir(os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run)):
-    #                         sample_counter += 1
-    #                         sim_pred_path = os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run, 'predictions_sim.csv')
-    #                         if os.path.exists(sim_pred_path):
-    #                             df_pred = pd.read_csv(sim_pred_path)
-    #                         else:
-    #                             df_pred = pd.read_csv(os.path.join(baseline_path, method, 'train_size_'+str(training_size), sample_run, 'predictions.csv'))
-    #                         set_correct = set(df_pred[df_pred['y_true'] == df_pred['y_pred']]['id'])
-    #                         training_size_dict = correct_ids_dict.get(training_size, {})
-    #                         run_dict = training_size_dict.get(sample_run, {})
-    #                         run_dict[method] = (set_correct, df_pred)
-
-    #                         training_size_dict[sample_run] = run_dict
-    #                         correct_ids_dict[training_size] = training_size_dict
-
-            # if method == 'SBERT':
-            #     results_path = os.path.join(prompt_dir, method, eval_measure+"_lc_results_max.csv")
-            #     if os.path.exists(results_path):
-            #         df_results = pd.read_csv(results_path)
-
-            #         # For each training size
-            #         for training_size in df_results.columns:
-            #             sample_counter = 0
-            #             for sample_run in os.listdir(os.path.join(prompt_dir, method, "train_size_"+str(training_size))):
-            #                 if os.path.isdir(os.path.join(prompt_dir, method, 'train_size_'+str(training_size), sample_run)):
-            #                     sample_counter += 1
-
-            #                     df_pred = pd.read_csv(os.path.join(os.path.join(prompt_dir, method, 'train_size_'+str(training_size), sample_run, 'predictions.csv')))
-            #                     set_correct = set(df_pred[df_pred['y_true'] == df_pred['y_pred']]['id'])
-            #                     training_size_dict = correct_ids_dict.get(training_size, {})
-            #                     run_dict = training_size_dict.get(sample_run, {})
-            #                     run_dict["SBERT_max"] = set_correct
-
-            #                     training_size_dict[sample_run] = run_dict
-            #                     correct_ids_dict[training_size] = training_size_dict
-
-
     # Dataframe to collect final data: Columns = Training sizes, Rows = Methods, Cells = Average number (over the n=20 runs) of test instances only this method classifies correctly
     df_unique_to_methods = None
 
@@ -194,12 +124,7 @@ def prompt_curve(results_path, dataset_path, sampling_strategy, prompt_name, dat
             df_test_orig = pd.read_csv(os.path.join(dataset_path, prompt_name, "test.csv"))
             # df_test_orig = pd.read_csv(os.path.join(dataset_path, prompt_name, "test_unseen_answers.csv"))
 
-            # for method in ["LR", "RF", "SVM", "BERT", "SBERT"]:
-            #for method in ["pretrained", "edit", "cosine", "overlap"]:
-            # for method in ["LR", "RF", "SVM", "BERT", "SBERT", "pretrained", "edit", "cosine", "overlap"]:
             for method in methods_to_consider:
-            #for method in correct_ids_dict[training_size][sample_run]:
-                #print(method)
 
                 method_set = correct_ids_dict[training_size][sample_run][method][0]
                 method_df = correct_ids_dict[training_size][sample_run][method][1]
@@ -279,16 +204,16 @@ def prompt_curve(results_path, dataset_path, sampling_strategy, prompt_name, dat
         else:
             df_unique_to_methods = pd.merge(df_unique_to_methods, df_train_size)
 
-    with open(os.path.join(results_path, result_folder, "-".join(methods_to_consider)+"_average_simiarities.csv"), 'w') as avg_sims:
+    with open(os.path.join(results_path, result_folder, dataset_name, sampling_strategy, "-".join(methods_to_consider)+"_average_simiarities.csv"), 'w') as avg_sims:
         avg_sims.write("Method\tAvg_Incorrect\tAvg_Correct\n")
         for key in average_similarities.keys():
             avg_sims.write(key+"\t"+str(average_similarities[key][0]/num_measures)+"\t"+str(average_similarities[key][1]/num_measures)+"\n")
 
     label_dist = pd.DataFrame.from_dict(label_dist_of_uniques, orient="index")
-    label_dist.to_csv(os.path.join(results_path, result_folder, "-".join(methods_to_consider)+"_label_dist.csv"), index=None)
+    label_dist.to_csv(os.path.join(results_path, result_folder, dataset_name, sampling_strategy, "-".join(methods_to_consider)+"_label_dist.csv"), index=None)
 
     label_dist_corr = pd.DataFrame.from_dict(label_dist_of_correct, orient="index")
-    label_dist_corr.to_csv(os.path.join(results_path, result_folder, "-".join(methods_to_consider)+"_label_dist_corr.csv"), index=None)
+    label_dist_corr.to_csv(os.path.join(results_path, result_folder, dataset_name,  sampling_strategy, "-".join(methods_to_consider)+"_label_dist_corr.csv"), index=None)
 
     if df_unique_to_methods is not None:
         df_unique_to_methods = df_unique_to_methods.set_index('method')
@@ -496,54 +421,10 @@ def dataset_curve(results_folder, dataset_path, eval_measure):
     plt.close()
 
 
-# dataset_curve("RESULTS_PRELIM_EXP/fin_results/SRA-2way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP/fin_results/SRA-5way", "weighted_f1")
+dataset_curve(results_folder="results/ASAP", dataset_path="data/ASAP", eval_measure="QWK")
 
-#dataset_curve("FINAL_RESULTS/fin_results_SBERTmodelComparison/SRA-2way", "weighted_f1")
-#dataset_curve("FINAL_RESULTS/fin_results_SBERTmodelComparison/SRA-5way", "weighted_f1")
+dataset_curve("results/SEP_DATASETS/Beetle/SRA_2way", "weighted_f1")
+dataset_curve("results/SEP_DATASETS/Beetle/SRA_5way", "weighted_f1")
 
-#dataset_curve("FINAL_RESULTS/fin_results_SBERTepochComparison/SRA-2way", "weighted_f1")
-#dataset_curve("FINAL_RESULTS/fin_results_SBERTepochComparison/SRA-5way", "weighted_f1")
-
-#dataset_curve("FINAL_RESULTS/fin_results_ASAPval/ASAP", "QWK")
-
-# dataset_curve("RESULTS_PRELIM_EXP/fin_results_SBERT_VAL-FIXED/SRA-2way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP/fin_results_SBERT_VAL-FIXED/SRA-5way", "weighted_f1")
-
-# dataset_curve("RESULTS_PRELIM_EXP/fin_results_BERT_COMPARE-CONFIG/SRA-2way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP/fin_results_BERT_COMPARE-CONFIG/SRA-5way", "weighted_f1")
-
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-models/SRA-2way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-models/SRA-5way", "weighted_f1")
-
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-10e/SRA-2way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-10e/SRA-5way", "weighted_f1")
-
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-2way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-bert-10e/SRA-5way", "weighted_f1")
-
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-noval/SRA-2way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/compare-sbert-noval/SRA-5way", "weighted_f1")
-
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-5way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/example-prompts/SRA-2way", "weighted_f1")
-
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-5way", "weighted_f1")
-# dataset_curve("RESULTS_PRELIM_EXP_FIXED/bert-sanity-check/SRA-2way", "weighted_f1")
-
-dataset_curve(results_folder="FINAL_RESULTS/EXP_RESULTS_SEP_DATASETS/ASAP", dataset_path="data/ASAP", eval_measure="QWK")
-# dataset_curve("EXP_RESULTS_SEP_DATASETS/Beetle/SRA_2way", "weighted_f1")
-# dataset_curve("EXP_RESULTS_SEP_DATASETS/Beetle/SRA_5way", "weighted_f1")
-# Does not exist for BERT
-# dataset_curve("EXP_RESULTS_SEP_DATASETS/SEB/SRA_2way", "weighted_f1")
-# Does not exist for BERT
-#dataset_curve("EXP_RESULTS_SEP_DATASETS/SEB/SRA_5way", "weighted_f1")
-
-# dataset_curve("BASELINE_RESULTS_SEP_DATASETS/ASAP", "QWK")
-# dataset_curve("BASELINE_RESULTS_SEP_DATASETS/Beetle/SRA_2way", "weighted_f1")
-# dataset_curve("BASELINE_RESULTS_SEP_DATASETS/Beetle/SRA_5way", "weighted_f1")
-# dataset_curve("BASELINE_RESULTS_SEP_DATASETS/SEB/SRA_2way", "weighted_f1")
-# dataset_curve("BASELINE_RESULTS_SEP_DATASETS/SEB/SRA_5way", "weighted_f1")
-
-# dataset_curve("EXP_RESULTS/SRA_5way", "weighted_f1")
-# dataset_curve("EXP_RESULTS/SRA_2way", "weighted_f1")
+dataset_curve("results/SEP_DATASETS/SEB/SRA_2way", "weighted_f1")
+dataset_curve("results/SEP_DATASETS/SEB/SRA_5way", "weighted_f1")
