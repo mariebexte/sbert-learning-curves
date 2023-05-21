@@ -24,7 +24,6 @@ Before running analysis scripts on results for the SRA corpus, run `python3 lear
 If you wish to only keep the learning curve stats, you can then generate a flatter representation of the results by running `python3 learning_curve/collect_results.py`, which will create a folder `results/RESULTS_REDUCED`.
 
 To plot comparisons of the different methods, run `python3 learning_curve/aggregate_curves_with_majority_oracle.py`.
-To determine which proportion of answers is only classified by one of the methods, run `python3 learning_curve/aggregate_curves_uniqueTo.py`.
 
 ## Citation
 ```
