@@ -18,7 +18,6 @@ from learning_curve.pretrained_SBERT import get_predictions_pretrained
 from sentence_transformers import SentenceTransformer
 
 target_column = "label"
-results_folder = "results"
 
 def write_classification_statistics(filepath, y_true, y_pred, qwk):
     with open(filepath, 'w') as eval_stats:
@@ -37,7 +36,7 @@ def write_classification_statistics(filepath, y_true, y_pred, qwk):
 # num_samples: How many training subsets to sample per training size
 # upsample_training: Only takes effect when sampling_strategy is 'balanced' and num_labels > number of actually present labels; Creating as-balanced-as-possible training sets in steps of num_labels
 # num_sbert_pairs_per_example: If None, build as many pairs as possible, otherwise limit to the specified amount, but if possible select different pairs across epochs
-def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None, bert_base="bert-base-uncased", sbert_base="all-MiniLM-L6-v2", num_sbert_pairs_per_example=None):
+def run(dataset_name, prompt_name, train_path, val_path, test_path, method, eval_measure, sampling_strategy, num_labels, max_size=None, upsample_training=False, num_samples=20, predetermined_train_sizes=None, bert_base="bert-base-uncased", sbert_base="all-MiniLM-L6-v2", num_sbert_pairs_per_example=None, results_folder='results'):
 
     target_path = os.path.join(results_folder, dataset_name, sampling_strategy, prompt_name, method)
     if not os.path.exists(target_path):

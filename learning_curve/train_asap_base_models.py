@@ -1,16 +1,16 @@
 import pandas as pd
 import os
 from learning_curve.train_bert import train_bert
-from learning_curve.train_sbert_limited import train_sbert_limited
+from learning_curve.train_sbert import train_sbert
 import sys
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report, f1_score
-from learning_curve.run_lc_limited import write_classification_statistics
+from learning_curve.run_lc import write_classification_statistics
 
 asap_base = "data/ASAP/"
 seed = 1234
 num_train = 1250
 
-results_dir = "BASE_MODELS"
+results_dir = "results/BASE_MODELS"
 
 # For each prompt train a model with larg(est possible) amount of training data (same across all prompts)
 # 1250 answers per prompt
@@ -88,6 +88,6 @@ def train_base_models_sbert():
             os.makedirs(run_path)
 
         # Returns predictions obtained using max and avg (default) strategy
-        y_pred_max, y_pred = train_sbert_limited(run_path=run_path, df_train=train_sample, df_val=df_val, df_test=df_test, save_model=True)
+        y_pred_max, y_pred = train_sbert(run_path=run_path, df_train=train_sample, df_val=df_val, df_test=df_test, save_model=True)
 
         eval_predictions(run_path=run_path, df_train_subset=train_sample, df_test=df_test, y_pred=y_pred, y_pred_max=y_pred_max, method="SBERT")

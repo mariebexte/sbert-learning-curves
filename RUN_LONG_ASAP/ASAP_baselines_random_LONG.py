@@ -10,18 +10,17 @@ base_path="data/ASAP"
 
 for method in ["edit", "pretrained", "overlap", "cosine"]:
 
-    for strategy in ["balanced", "random"]:
+    for prompt in range(1, 11):
 
-        for prompt in range(1, 11):
-
-            run(dataset_name="ASAP",
-            prompt_name=str(prompt),
-            train_path=os.path.join(base_path, str(prompt), "train.csv"),
-            val_path=os.path.join(base_path, str(prompt), "val.csv"),
-            test_path=os.path.join(base_path, str(prompt), "test.csv"),
-            method=method,
-            eval_measure="QWK",
-            sampling_strategy=strategy,
-            num_labels=5,
-            upsample_training=True,
-            predetermined_train_sizes=deepcopy(train_sizes))
+        run(dataset_name="ASAP",
+        prompt_name=str(prompt),
+        train_path=os.path.join(base_path, str(prompt), "train.csv"),
+        val_path=os.path.join(base_path, str(prompt), "val.csv"),
+        test_path=os.path.join(base_path, str(prompt), "test.csv"),
+        method=method,
+        eval_measure="QWK",
+        sampling_strategy='random',
+        num_labels=5,
+        upsample_training=True,
+        predetermined_train_sizes=deepcopy(train_sizes),
+        results_folder='results_long')

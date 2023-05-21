@@ -12,7 +12,8 @@ eval_measure="weighted_f1"
 sampling_strategy="balanced"
 num_labels=2
 
-with open('SRA_Beetle.txt', 'r') as prompts:
+# with open('data/SRA_SEB.txt', 'r') as prompts:
+with open('data/SRA_Beetle.txt', 'r') as prompts:
 
     for prompt in prompts:
         prompt=prompt.strip()

@@ -14,7 +14,7 @@ base_path="data/ASAP"
 
 # Neural models:
 # Must call run_lc, but with differing base models & training data
-bert_model_dir = "ASAP_BASE_MODELS/BERT/ASAP"
+bert_model_dir = "results/BASE_MODELS/BERT/ASAP"
 
 # Base model
 for base_prompt in range(1, 11):

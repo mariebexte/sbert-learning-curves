@@ -97,7 +97,7 @@ def train_bert(run_path, df_train, df_val, df_test, answer_column="text", target
 
     max_length = 512
 
-    device = 'mps'
+    device = 'cpu'
     if torch.cuda.is_available():
         device = 'cuda'
 

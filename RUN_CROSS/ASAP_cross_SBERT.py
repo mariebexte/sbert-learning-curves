@@ -12,7 +12,7 @@ num_train = 1250
 train_sizes=[5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 base_path="data/ASAP"
 
-bert_model_dir = "ASAP_BASE_MODELS/SBERT/ASAP"
+bert_model_dir = "results/BASE_MODELS/SBERT/ASAP"
 
 # Base model
 for base_prompt in range(1, 11):

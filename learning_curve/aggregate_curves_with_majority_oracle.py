@@ -217,7 +217,7 @@ def prompt_curve(data_path, result_path, dataset_name, sampling_strategy, eval_m
         else:
             df_majority_oracle = pd.merge(df_majority_oracle, df_train_size)
 
- 
+    print(df_majority_oracle)
     if df_majority_oracle is not None:
 
         # Rerder columns
@@ -239,7 +239,7 @@ def prompt_curve(data_path, result_path, dataset_name, sampling_strategy, eval_m
     # plt.ylim([0, 500])
     plt.ylim([0, 1])
     plt.xlabel("# of training examples", fontsize=20)
-    plt.ylabel("# of correctly classified answers", fontsize=10)
+    plt.ylabel(eval_measure, fontsize=10)
 
     # Plot learning curve
     plt.grid()
@@ -340,9 +340,9 @@ def strategy_curve(data_path, result_path, dataset_name, eval_measure):
     overview_df.to_csv(os.path.join(result_path, dataset_name+"_"+sampling_strategy+"_oraclePerf_method-comparison.csv"),index=None)
 
     plt.title(dataset_name+" ("+sampling_strategy+")", fontsize=12)
-    plt.ylim([0, 500])
+    plt.ylim([0, 1])
     plt.xlabel("# of training examples", fontsize=20)
-    plt.ylabel("# of correctly classified answers", fontsize=10)
+    plt.ylabel(eval_measure, fontsize=10)
 
     plt.grid()
 
@@ -368,6 +368,10 @@ def strategy_curve(data_path, result_path, dataset_name, eval_measure):
 
 # Path to the results of an entire dataset (expected to contain subdirs with sampling strategy results)
 def dataset_curve(data_path, result_path, eval_measure):
+
+    if not os.path.exists(result_path):
+        print("Dir", data_path, "does not exist, skipping.")
+        return None
 
     dataset_name = os.path.basename(result_path)
     # Dataframe to collect overall averaged results per method and sampling strategy
@@ -409,9 +413,9 @@ def dataset_curve(data_path, result_path, eval_measure):
 
 
     plt.title(dataset_name, fontsize=12)
-    plt.ylim([0, 500])
+    plt.ylim([0, 1])
     plt.xlabel("# of training examples", fontsize=20)
-    plt.ylabel("# of correctly classified answers", fontsize=10)
+    plt.ylabel(eval_measure, fontsize=10)
 
     plt.grid(linewidth = 0.1)
 

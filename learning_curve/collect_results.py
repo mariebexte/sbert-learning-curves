@@ -6,8 +6,6 @@ import os
 # Grab just the result tables from the learning curve runs and copy to a new location
 def collect(dir_to_collect_from, target_location):
 
-    dataset = os.path.basename(dir_to_collect_from)
-
     for dataset in ["ASAP"]:
         if os.path.isdir(os.path.join(dir_to_collect_from, dataset)):
     
@@ -41,7 +39,7 @@ def collect(dir_to_collect_from, target_location):
 
 
 
-    for dataset in ["SEB", "BEETLE"]:
+    for dataset in ["SEB", "Beetle"]:
         if os.path.isdir(os.path.join(dir_to_collect_from, dataset)):
 
             for subset in ["SRA_2way", "SRA_5way"]:
@@ -78,3 +76,5 @@ def collect(dir_to_collect_from, target_location):
 
 
 collect("results/RESULTS_SEP_DATASETS", "results/RESULTS_REDUCED")
+collect("results", "results/RESULTS_REDUCED")
+collect("results_long", "results_long/RESULTS_REDUCED")
